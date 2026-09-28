@@ -1,0 +1,816 @@
+{
+  "success": true,
+  "status": 200,
+  "result": {
+    "stats": [
+      {
+        "componentCode": "bo_components",
+        "defaultAnchor": 0,
+        "belongingCamp": null,
+        "headingInfo": {
+          "tableDataInfo": [
+            {
+              "showName": "炙热沙城Ⅱ",
+              "logo": null,
+              "bg": null,
+              "requestValue": "2",
+              "sourceData": null,
+              "baikeLink": null,
+              "fontColor": null,
+              "bgColor": null
+            },
+            {
+              "showName": "阿努比斯",
+              "logo": null,
+              "bg": null,
+              "requestValue": "1",
+              "sourceData": null,
+              "baikeLink": null,
+              "fontColor": null,
+              "bgColor": null
+            }
+          ],
+          "memberPosition": null,
+          "memberWinStatus": null
+        },
+        "bodyInfo": null,
+        "separatorInfo": null
+      },
+      {
+        "componentCode": "single_horizontal_display",
+        "defaultAnchor": null,
+        "belongingCamp": null,
+        "headingInfo": {
+          "tableDataInfo": [
+            {
+              "showName": "",
+              "logo": "",
+              "bg": null,
+              "requestValue": null,
+              "sourceData": null,
+              "baikeLink": null,
+              "fontColor": null,
+              "bgColor": null
+            },
+            {
+              "showName": "",
+              "logo": "",
+              "bg": null,
+              "requestValue": null,
+              "sourceData": null,
+              "baikeLink": null,
+              "fontColor": null,
+              "bgColor": null
+            }
+          ],
+          "memberPosition": null,
+          "memberWinStatus": null
+        },
+        "bodyInfo": [
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "FUT",
+                "logo": "https://i1.hoopchina.com.cn/commonmatch/common/memberInfo/logo/23441c1434d293b318c572ec74a64ee6.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=534401",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "8",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 8.0,
+                "baikeLink": "huputiyu://score/wiki?itemId=534401",
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "home",
+            "memberWinStatus": null
+          },
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "Vitality",
+                "logo": "https://i1.hoopchina.com.cn/commonmatch/common/memberInfo/logo/f5d46f0225470a872020d1841d55523d.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=534387",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "13",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 13.0,
+                "baikeLink": "huputiyu://score/wiki?itemId=534387",
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "away",
+            "memberWinStatus": null
+          }
+        ],
+        "separatorInfo": null
+      },
+      {
+        "componentCode": "list_display_components",
+        "defaultAnchor": null,
+        "belongingCamp": "home",
+        "headingInfo": {
+          "tableDataInfo": [
+            {
+              "showName": "FUT",
+              "logo": "https://i1.hoopchina.com.cn/commonmatch/common/memberInfo/logo/23441c1434d293b318c572ec74a64ee6.png",
+              "bg": null,
+              "requestValue": "",
+              "sourceData": null,
+              "baikeLink": "huputiyu://score/wiki?itemId=534401",
+              "fontColor": null,
+              "bgColor": null
+            },
+            {
+              "showName": "K/D",
+              "logo": "",
+              "bg": null,
+              "requestValue": "",
+              "sourceData": null,
+              "baikeLink": "huputiyu://score/wiki?itemId=534401",
+              "fontColor": null,
+              "bgColor": null
+            },
+            {
+              "showName": "KAST",
+              "logo": "",
+              "bg": null,
+              "requestValue": "",
+              "sourceData": null,
+              "baikeLink": "huputiyu://score/wiki?itemId=534401",
+              "fontColor": null,
+              "bgColor": null
+            },
+            {
+              "showName": "ADR",
+              "logo": "",
+              "bg": null,
+              "requestValue": "",
+              "sourceData": null,
+              "baikeLink": "huputiyu://score/wiki?itemId=534401",
+              "fontColor": null,
+              "bgColor": null
+            },
+            {
+              "showName": "Rating",
+              "logo": "",
+              "bg": null,
+              "requestValue": "",
+              "sourceData": null,
+              "baikeLink": "huputiyu://score/wiki?itemId=534401",
+              "fontColor": null,
+              "bgColor": null
+            }
+          ],
+          "memberPosition": "home",
+          "memberWinStatus": null
+        },
+        "bodyInfo": [
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "dem0n",
+                "logo": "https://i5.hoopchina.com.cn/commonmatch/common/memberInfo/logo/2fd03149d6a3daff0c518efbbd5b8045.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "15/14",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "81",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 81.0,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "78",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 78.2,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "1.16",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 1.16,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "home",
+            "memberWinStatus": null
+          },
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "Krabeni",
+                "logo": "https://i10.hoopchina.com.cn/commonmatch/common/memberInfo/logo/97d972bdca4a10d643265a827a58e152.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "15/16",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "62",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 61.9,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "76",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 76.0,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "1.14",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 1.14,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "home",
+            "memberWinStatus": null
+          },
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "dziugss",
+                "logo": "https://i3.hoopchina.com.cn/commonmatch/common/memberInfo/logo/1ae3ef7fd76015fa62816a022533dadc.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "13/14",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "67",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 66.7,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "66",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 65.6,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "0.96",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0.96,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "home",
+            "memberWinStatus": null
+          },
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "xfl0ud",
+                "logo": "https://i1.hoopchina.com.cn/commonmatch/common/memberInfo/logo/58ee80018cff1455bb3b958ce5b08cc7.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=80629",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "6/16",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=80629",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "71",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 71.4,
+                "baikeLink": "huputiyu://score/wiki?itemId=80629",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "43",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 42.8,
+                "baikeLink": "huputiyu://score/wiki?itemId=80629",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "0.62",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0.62,
+                "baikeLink": "huputiyu://score/wiki?itemId=80629",
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "home",
+            "memberWinStatus": null
+          },
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "cmtry",
+                "logo": "https://i3.hoopchina.com.cn/commonmatch/common/memberInfo/logo/cb4003124c90929e44c98c196b0ad498.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "7/15",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "52",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 52.4,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "31",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 31.1,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "0.57",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0.57,
+                "baikeLink": null,
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "home",
+            "memberWinStatus": null
+          }
+        ],
+        "separatorInfo": null
+      },
+      {
+        "componentCode": "list_display_components",
+        "defaultAnchor": null,
+        "belongingCamp": "away",
+        "headingInfo": {
+          "tableDataInfo": [
+            {
+              "showName": "Vitality",
+              "logo": "https://i1.hoopchina.com.cn/commonmatch/common/memberInfo/logo/f5d46f0225470a872020d1841d55523d.png",
+              "bg": null,
+              "requestValue": "",
+              "sourceData": null,
+              "baikeLink": "huputiyu://score/wiki?itemId=534387",
+              "fontColor": null,
+              "bgColor": null
+            },
+            {
+              "showName": "K/D",
+              "logo": "",
+              "bg": null,
+              "requestValue": "",
+              "sourceData": null,
+              "baikeLink": "huputiyu://score/wiki?itemId=534387",
+              "fontColor": null,
+              "bgColor": null
+            },
+            {
+              "showName": "KAST",
+              "logo": "",
+              "bg": null,
+              "requestValue": "",
+              "sourceData": null,
+              "baikeLink": "huputiyu://score/wiki?itemId=534387",
+              "fontColor": null,
+              "bgColor": null
+            },
+            {
+              "showName": "ADR",
+              "logo": "",
+              "bg": null,
+              "requestValue": "",
+              "sourceData": null,
+              "baikeLink": "huputiyu://score/wiki?itemId=534387",
+              "fontColor": null,
+              "bgColor": null
+            },
+            {
+              "showName": "Rating",
+              "logo": "",
+              "bg": null,
+              "requestValue": "",
+              "sourceData": null,
+              "baikeLink": "huputiyu://score/wiki?itemId=534387",
+              "fontColor": null,
+              "bgColor": null
+            }
+          ],
+          "memberPosition": "away",
+          "memberWinStatus": null
+        },
+        "bodyInfo": [
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "apEX",
+                "logo": "https://i1.hoopchina.com.cn/commonmatch/common/memberInfo/logo/7b34b4f11756d6a121172e86df13db65.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=81035",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "15/14",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=81035",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "81",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 81.0,
+                "baikeLink": "huputiyu://score/wiki?itemId=81035",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "98",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 97.9,
+                "baikeLink": "huputiyu://score/wiki?itemId=81035",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "1.40",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 1.4,
+                "baikeLink": "huputiyu://score/wiki?itemId=81035",
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "away",
+            "memberWinStatus": null
+          },
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "ZywOo",
+                "logo": "https://i3.hoopchina.com.cn/commonmatch/common/memberInfo/logo/dee3d87154a76d1581e4d1cfe44718fc.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=86007",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "18/10",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=86007",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "81",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 81.0,
+                "baikeLink": "huputiyu://score/wiki?itemId=86007",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "82",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 82.0,
+                "baikeLink": "huputiyu://score/wiki?itemId=86007",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "1.32",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 1.32,
+                "baikeLink": "huputiyu://score/wiki?itemId=86007",
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "away",
+            "memberWinStatus": null
+          },
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "jL",
+                "logo": "https://i3.hoopchina.com.cn/commonmatch/common/memberInfo/logo/bb57d3f5e86d2da82ada5df18e991cba.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=86087",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "13/11",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=86087",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "76",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 76.2,
+                "baikeLink": "huputiyu://score/wiki?itemId=86087",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "78",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 77.8,
+                "baikeLink": "huputiyu://score/wiki?itemId=86087",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "1.21",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 1.21,
+                "baikeLink": "huputiyu://score/wiki?itemId=86087",
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "away",
+            "memberWinStatus": null
+          },
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "flameZ",
+                "logo": "https://i10.hoopchina.com.cn/commonmatch/common/memberInfo/logo/c7add75ab692ea245a95654abfafed00.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=80052",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "15/9",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=80052",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "91",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 90.5,
+                "baikeLink": "huputiyu://score/wiki?itemId=80052",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "68",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 68.0,
+                "baikeLink": "huputiyu://score/wiki?itemId=80052",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "1.15",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 1.15,
+                "baikeLink": "huputiyu://score/wiki?itemId=80052",
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "away",
+            "memberWinStatus": null
+          },
+          {
+            "bodyDataInfo": [
+              {
+                "showName": "ropz",
+                "logo": "https://i1.hoopchina.com.cn/commonmatch/common/memberInfo/logo/13180668c6d3d9c0676cea826de54579.png",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=81057",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "13/12",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 0,
+                "baikeLink": "huputiyu://score/wiki?itemId=81057",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "76",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 76.2,
+                "baikeLink": "huputiyu://score/wiki?itemId=81057",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "59",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 58.7,
+                "baikeLink": "huputiyu://score/wiki?itemId=81057",
+                "fontColor": null,
+                "bgColor": null
+              },
+              {
+                "showName": "1.09",
+                "logo": "",
+                "bg": null,
+                "requestValue": null,
+                "sourceData": 1.09,
+                "baikeLink": "huputiyu://score/wiki?itemId=81057",
+                "fontColor": null,
+                "bgColor": null
+              }
+            ],
+            "memberPosition": "away",
+            "memberWinStatus": null
+          }
+        ],
+        "separatorInfo": null
+      }
+    ],
+    "pollingConfig": null
+  }
+}

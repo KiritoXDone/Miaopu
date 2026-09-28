@@ -1,0 +1,142 @@
+{
+  "success": true,
+  "status": 200,
+  "result": {
+    "businessType": "common_match",
+    "matchId": "1441778164564982772",
+    "titleDesc": "上海冠军赛小组赛",
+    "bgImageUrl": "https://i3.hoopchina.com.cn/newsPost/rc-upload-1790218360138-9/1790251938429-f69e30c8.jpg",
+    "newsJumpImgUrl": "https://i3.hoopchina.com.cn/newsPost/rc-upload-1790504220935-8/1790504532661-9f1eb21d.jpg",
+    "totalScoreLogo": "https://i3.hoopchina.com.cn/newsPost/rc-upload-1790218360138-5/1790251661477-27daba22.png",
+    "totalScoreShareLogo": "https://i1.hoopchina.com.cn/newsPost/rc-upload-1790218360138-7/1790251664718-51f647bb.png",
+    "matchScoreCount": 163520,
+    "memberBasicInfos": [
+      {
+        "memberName": "JDG",
+        "memberScore": "0",
+        "memberLogo": "https://i5.hoopchina.com.cn/commonmatch/common/memberInfo/logo/4f6a29d5278fcc45cc1a9513a7edde81.png"
+      },
+      {
+        "memberName": "FUT",
+        "memberScore": "2",
+        "memberLogo": "https://i3.hoopchina.com.cn/commonmatch/common/memberInfo/logo/9fed8f1b99915fea06aab4407dfcd343.png"
+      }
+    ],
+    "memberScoreInfos": [
+      [
+        [
+          {
+            "memberName": "jkuro",
+            "memberAllAvgScore": "5.9",
+            "memberSortScore": 5.9,
+            "scoreDayColor": "#2F6EEB",
+            "scoreNightColor": "#2F6EEB",
+            "teamPosition": "home",
+            "playerPosition": null
+          }
+        ],
+        [
+          {
+            "memberName": "BerLIN",
+            "memberAllAvgScore": "4.0",
+            "memberSortScore": 4.0,
+            "scoreDayColor": "#2F6EEB",
+            "scoreNightColor": "#2F6EEB",
+            "teamPosition": "home",
+            "playerPosition": null
+          }
+        ],
+        [
+          {
+            "memberName": "crownfisher",
+            "memberAllAvgScore": "4.0",
+            "memberSortScore": 4.0,
+            "scoreDayColor": "#2F6EEB",
+            "scoreNightColor": "#2F6EEB",
+            "teamPosition": "home",
+            "playerPosition": null
+          }
+        ],
+        [
+          {
+            "memberName": "Yuicaw",
+            "memberAllAvgScore": "3.8",
+            "memberSortScore": 3.8,
+            "scoreDayColor": "#2F6EEB",
+            "scoreNightColor": "#2F6EEB",
+            "teamPosition": "home",
+            "playerPosition": null
+          }
+        ],
+        [
+          {
+            "memberName": "zhe",
+            "memberAllAvgScore": "3.7",
+            "memberSortScore": 3.7,
+            "scoreDayColor": "#2F6EEB",
+            "scoreNightColor": "#2F6EEB",
+            "teamPosition": "home",
+            "playerPosition": null
+          }
+        ]
+      ],
+      [
+        [
+          {
+            "memberName": "s0pp",
+            "memberAllAvgScore": "9.7",
+            "memberSortScore": 9.7,
+            "scoreDayColor": "#EA0E20",
+            "scoreNightColor": "#EA0E20",
+            "teamPosition": "away",
+            "playerPosition": null
+          }
+        ],
+        [
+          {
+            "memberName": "xeus",
+            "memberAllAvgScore": "9.5",
+            "memberSortScore": 9.5,
+            "scoreDayColor": "#EA0E20",
+            "scoreNightColor": "#EA0E20",
+            "teamPosition": "away",
+            "playerPosition": null
+          }
+        ],
+        [
+          {
+            "memberName": "yetujey",
+            "memberAllAvgScore": "9.4",
+            "memberSortScore": 9.4,
+            "scoreDayColor": "#EA0E20",
+            "scoreNightColor": "#EA0E20",
+            "teamPosition": "away",
+            "playerPosition": null
+          }
+        ],
+        [
+          {
+            "memberName": "KROSTALY",
+            "memberAllAvgScore": "9.4",
+            "memberSortScore": 9.4,
+            "scoreDayColor": "#EA0E20",
+            "scoreNightColor": "#EA0E20",
+            "teamPosition": "away",
+            "playerPosition": null
+          }
+        ],
+        [
+          {
+            "memberName": "sociablEE",
+            "memberAllAvgScore": "9.2",
+            "memberSortScore": 9.2,
+            "scoreDayColor": "#EA0E20",
+            "scoreNightColor": "#EA0E20",
+            "teamPosition": "away",
+            "playerPosition": null
+          }
+        ]
+      ]
+    ]
+  }
+}

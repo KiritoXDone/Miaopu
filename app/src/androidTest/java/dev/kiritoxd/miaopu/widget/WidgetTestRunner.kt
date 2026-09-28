@@ -21,11 +21,22 @@ import java.io.File
 
 /** Runs RemoteViews on Android itself, including night mode, compact sizes and large fonts. */
 class WidgetTestRunner : Instrumentation() {
-    override fun onCreate(arguments: Bundle?) { super.onCreate(arguments); start() }
+    private var livePreview = false
+    override fun onCreate(arguments: Bundle?) {
+        super.onCreate(arguments)
+        livePreview = arguments?.getString("preview_live") == "true"
+        start()
+    }
 
     override fun onStart() {
         val result = Bundle()
         try {
+            if (livePreview) {
+                val count = WidgetLivePreview.show(targetContext)
+                result.putString("stream", "Displayed live demo in $count widgets; refresh restores real data.\n")
+                finish(Activity.RESULT_OK, result)
+                return
+            }
             var count = 0
             runOnMainSync {
                 val now = System.currentTimeMillis()

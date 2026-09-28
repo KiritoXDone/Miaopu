@@ -33,3 +33,13 @@ adb shell am instrument -w dev.kiritoxd.miaopu.debug.test/dev.kiritoxd.miaopu.wi
 单元测试覆盖比赛筛选、去重、过期状态、比分与日期表达和缓存序列化。设备测试使用实际 RemoteViews 渲染两种尺寸、两种主题、普通/大字体、最小高度及五种数据状态，导出图片供布局检查。已在 HyperOS 桌面确认两种尺寸的添加、真实赛程与队标显示。60 组实机渲染覆盖跨日时间、最小高度和大字体，并检查文字高度与父容器边界；后台周期执行仍受系统策略限制。
 
 若系统冻结策略拦截首次小部件广播，桌面可能停留在初始加载画面。打开喵扑可恢复更新；持续后台刷新仍受设备的冻结和省电设置限制。
+
+## 进行中演示
+
+测试 APK 支持临时将桌面首场比赛显示为进行中、比分 1:1，不修改真实赛程缓存。刷新后恢复实际数据：
+
+```bash
+adb shell am instrument -w -e preview_live true dev.kiritoxd.miaopu.debug.test/dev.kiritoxd.miaopu.widget.WidgetTestRunner
+```
+
+2×2 底部显示赛事类型；4×2 使用时间、分隔符、赛事类型，左队队标靠近比分，右队队标位于队名前。

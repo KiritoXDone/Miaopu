@@ -36,7 +36,7 @@ android {
         versionName = "1.1.1"
         manifestPlaceholders["appLabel"] = "喵扑"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "dev.kiritoxd.miaopu.widget.WidgetTestRunner"
     }
 
     buildFeatures {

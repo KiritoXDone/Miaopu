@@ -27,6 +27,7 @@ import dev.kiritoxd.miaopu.data.Schedule
 import dev.kiritoxd.miaopu.data.StageRatingDetail
 import dev.kiritoxd.miaopu.data.mergeCommentsByHeat
 import dev.kiritoxd.miaopu.data.isNewerVersion
+import dev.kiritoxd.miaopu.widget.WidgetUpdates
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -65,6 +66,7 @@ class MiaopuViewModel(
     private val subscriptionStore = EsportSubscriptionStore(application)
     private val initialSubscriptions = subscriptionStore.subscriptions()
     private var navigator: MiaopuNavigator? = null
+    private var pendingWidgetDestination: Pair<MatchSummary?, Esport?>? = null
     private val schedules = mutableMapOf<Esport, Schedule>()
     private val scheduleViewports = mutableMapOf<Esport, ScheduleViewportSnapshot>()
     private val stageViewports = mutableMapOf<String, StageViewportSnapshot>()
@@ -124,6 +126,7 @@ class MiaopuViewModel(
         if (navigator === nextNavigator) return
         navigator = nextNavigator
         restoreNavigationState()
+        pendingWidgetDestination?.let { (match, sport) -> openWidgetDestination(match, sport) }
     }
 
     internal fun detachNavigator(detachedNavigator: MiaopuNavigator) {
@@ -177,6 +180,7 @@ class MiaopuViewModel(
         subscribedEsports = next
         scheduleStates = scheduleStates.filterKeys { it in next }
         subscriptionStore.saveSubscriptions(next)
+        viewModelScope.launch { WidgetUpdates.subscriptionsChanged(getApplication()) }
 
         if (selectedEsport !in next) {
             selectedEsport = next.first()
@@ -251,6 +255,19 @@ class MiaopuViewModel(
         val ratings = AppScreen.Ratings(match.toRoute())
         navigator?.push(ratings)
         loadRatings(match)
+    }
+
+    internal fun openWidgetDestination(match: MatchSummary?, sport: Esport?) {
+        val currentNavigator = navigator
+        if (currentNavigator == null) {
+            pendingWidgetDestination = match to sport
+            return
+        }
+        pendingWidgetDestination = null
+        while (currentNavigator.backStack.size > 1) goBack()
+        sport?.let(::selectEsport)
+        selectMainSection(MainSection.EVENTS)
+        if (match != null) openMatch(match)
     }
 
     fun openStage(match: MatchSummary, stage: RatingStage, stageNumber: Int) {
@@ -458,11 +475,13 @@ class MiaopuViewModel(
         scheduleJobs.remove(esport)?.cancel()
         updateScheduleState(esport, LoadState.Loading)
         val scheduleJob = viewModelScope.launch(start = CoroutineStart.LAZY) {
+            val startedAt = System.currentTimeMillis()
             val nextState = adapter.getSchedule(esport).toLoadState()
             if (scheduleJobs[esport] !== coroutineContext[Job]) return@launch
             (nextState as? LoadState.Ready)?.value?.let { schedules[esport] = it }
             updateScheduleState(esport, nextState)
             scheduleJobs.remove(esport)
+            WidgetUpdates.publish(getApplication(), esport, (nextState as? LoadState.Ready)?.value, startedAt)
         }
         scheduleJobs[esport] = scheduleJob
         scheduleJob.start()

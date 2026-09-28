@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_match_name">喵扑·单场赛况</string>
+    <string name="widget_schedule_name">喵扑·近期赛程</string>
+    <string name="widget_match_description">查看已订阅赛事的单场比分与状态</string>
+    <string name="widget_schedule_description">查看已订阅赛事的近期比赛</string>
+    <string name="widget_title">喵扑</string>
+    <string name="widget_schedule_title">喵扑 · 近期赛程</string>
+    <string name="widget_refresh">刷新赛程</string>
+    <string name="widget_all">全部赛程 ›</string>
+    <string name="widget_loading">正在加载赛程</string>
+    <color name="widget_background">#FFFFFF</color>
+    <color name="widget_text">#18191C</color>
+    <color name="widget_secondary">#69717E</color>
+    <color name="widget_divider">#E8EBF0</color>
+    <color name="widget_accent">#2878F5</color>
+    <color name="widget_placeholder">#E8EDF5</color>
+</resources>

@@ -62,8 +62,22 @@ class WidgetTestRunner : Instrumentation() {
                         view.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY))
                         view.layout(0, 0, width, height)
                         verifyTextBounds(view)
+                        if (!wide) {
+                            val card = view.findViewById<View>(R.id.widget_root)
+                            check(kotlin.math.abs(card.width - card.height) <= 1) { "Single match card must be square" }
+                        }
                         check(view.findViewById<TextView>(R.id.widget_footer).height > 0)
                         check(view.findViewById<View>(R.id.widget_empty).visibility == if (state.matches.isEmpty()) View.VISIBLE else View.GONE)
+                        if (wide && state.matches.isNotEmpty()) {
+                            val status = view.findViewById<TextView>(R.id.widget_row_status)
+                            val sport = view.findViewById<TextView>(R.id.widget_row_sport)
+                            check(sport.left >= status.right) { "Sport must follow the time horizontally" }
+                            val rows = view.findViewById<ViewGroup>(R.id.widget_rows)
+                            repeat(rows.childCount) { index ->
+                                val label = rows.getChildAt(index).findViewById<TextView>(R.id.widget_row_sport)
+                                check(label.left == sport.left) { "Sport labels must share the same left edge" }
+                            }
+                        }
                         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                         view.draw(Canvas(bitmap))
                         val file = File(targetContext.getExternalFilesDir(null), "widget-${if (wide) "4x2" else "2x2"}-${if (night) "dark" else "light"}-${profile}-$name.png")

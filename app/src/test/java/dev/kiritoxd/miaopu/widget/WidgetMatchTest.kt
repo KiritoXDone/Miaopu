@@ -72,6 +72,23 @@ class WidgetMatchTest {
         } finally { TimeZone.setDefault(zone) }
     }
 
+    @Test fun `day offsets use local calendar days across year and daylight saving boundaries`() {
+        val original = TimeZone.getDefault()
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
+            fun instant(year: Int, month: Int, day: Int, hour: Int) = Calendar.getInstance().apply {
+                clear(); set(year, month - 1, day, hour, 0)
+            }.timeInMillis
+            val beforeDst = instant(2026, 3, 7, 23)
+            assertEquals(1, match("x", "未开始", instant(2026, 3, 8, 3)).startDayOffset(beforeDst))
+            val newYear = instant(2026, 12, 31, 23)
+            assertEquals(0, match("x", "未开始", newYear).startDayOffset(newYear))
+            assertEquals(1, match("x", "未开始", instant(2027, 1, 1, 8)).startDayOffset(newYear))
+            assertEquals(2, match("x", "未开始", instant(2027, 1, 2, 8)).startDayOffset(newYear))
+            assertEquals("08:00", match("x", "未开始", instant(2027, 1, 2, 8)).clockLabel())
+        } finally { TimeZone.setDefault(original) }
+    }
+
     private fun match(id: String, status: String, start: Long) = WidgetMatch(
         id, "lol", "T1 vs GEN", "全球总决赛", status, null, start, "20:00",
         listOf(WidgetTeam("T1", "https://example.com/logo.png", "1"), WidgetTeam("GEN", null, "1")),

@@ -6,6 +6,10 @@ import android.content.Context
 import android.os.Build
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.RelativeSizeSpan
+import android.text.style.SuperscriptSpan
 import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
@@ -15,6 +19,7 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.roundToInt
 
 internal object WidgetRenderer {
     fun ids(context: Context): List<Pair<Int, Boolean>> {
@@ -32,8 +37,9 @@ internal object WidgetRenderer {
         ids(context).forEach { (id, wide) ->
             val options = manager.getAppWidgetOptions(id)
             val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 160)
+            val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, if (wide) 340 else 170)
             val largeFont = context.resources.configuration.fontScale > 1.3f
-            val views = create(context, id, wide, state, now, height, largeFont, refreshing)
+            val views = create(context, id, wide, state, now, height, largeFont, refreshing, width)
             manager.updateAppWidget(id, views)
         }
     }
@@ -41,8 +47,10 @@ internal object WidgetRenderer {
     internal fun create(
         context: Context, id: Int, wide: Boolean, state: WidgetScheduleState, now: Long,
         height: Int = 180, largeFont: Boolean = false, refreshing: Boolean = false,
+        width: Int = if (wide) 340 else 170,
     ): RemoteViews {
-        val compact = height < 155 || largeFont
+        val contentHeight = if (wide) height else minOf(width, height)
+        val compact = contentHeight < 155 || largeFont
         val layout = when {
             wide && compact -> R.layout.widget_schedule_compact
             wide -> R.layout.widget_schedule
@@ -50,6 +58,13 @@ internal object WidgetRenderer {
             else -> R.layout.widget_match
         }
         val views = RemoteViews(context.packageName, layout)
+        if (!wide) {
+            val density = context.resources.displayMetrics.density
+            val horizontal = ((width - contentHeight) * density).roundToInt().coerceAtLeast(0)
+            val vertical = ((height - contentHeight) * density).roundToInt().coerceAtLeast(0)
+            views.setViewPadding(R.id.widget_host, horizontal / 2, vertical / 2,
+                horizontal - horizontal / 2, vertical - vertical / 2)
+        }
         views.setOnClickPendingIntent(R.id.widget_root, WidgetIntents.open(context, id))
         views.setOnClickPendingIntent(R.id.widget_open, WidgetIntents.open(context, id))
         views.setOnClickPendingIntent(R.id.widget_refresh, WidgetIntents.refresh(context, id))
@@ -76,10 +91,10 @@ internal object WidgetRenderer {
         val empty = state.matches.isEmpty()
         views.setViewVisibility(R.id.widget_empty, if (empty) View.VISIBLE else View.GONE)
         views.setTextViewText(R.id.widget_empty, when {
-            !online && !state.hasFetched -> "等待网络连接"
-            refreshing || !state.hasFetched -> "正在加载赛程"
-            state.failed -> "暂时无法获取赛程"
-            else -> "近期暂无比赛"
+            !online && !state.hasFetched -> if (contentHeight < 135) "等待联网" else "等待网络连接"
+            refreshing || !state.hasFetched -> if (contentHeight < 135) "加载中" else "正在加载赛程"
+            state.failed -> if (contentHeight < 135) "获取失败" else "暂时无法获取赛程"
+            else -> if (contentHeight < 135) "暂无比赛" else "近期暂无比赛"
         })
         views.setInt(R.id.widget_empty, "setMaxLines", 3)
         if (wide) {
@@ -87,25 +102,23 @@ internal object WidgetRenderer {
             views.setViewVisibility(R.id.widget_date, if (largeFont) View.GONE else View.VISIBLE)
             views.setViewVisibility(R.id.widget_rows, if (empty) View.GONE else View.VISIBLE)
             views.removeAllViews(R.id.widget_rows)
-            state.matches.take(if (height < 130) 1 else if (compact) 2 else 3).forEach { match ->
+            state.matches.take(if (contentHeight < 130 || largeFont && contentHeight < 175) 1 else if (compact) 2 else 3).forEach { match ->
                 views.addView(R.id.widget_rows, row(context, id, match, now, largeFont))
             }
         } else {
             if (compact) {
-                views.setViewVisibility(R.id.widget_logo_container_0, if (height < 135) View.GONE else View.VISIBLE)
-                views.setViewVisibility(R.id.widget_logo_container_1, if (height < 135) View.GONE else View.VISIBLE)
+                views.setViewVisibility(R.id.widget_logo_container_0, if (contentHeight < 155) View.GONE else View.VISIBLE)
+                views.setViewVisibility(R.id.widget_logo_container_1, if (contentHeight < 155) View.GONE else View.VISIBLE)
             }
             views.setViewVisibility(R.id.widget_match_content, if (empty) View.GONE else View.VISIBLE)
-            views.setViewVisibility(R.id.widget_status, if (empty || height < 135 || largeFont) View.GONE else View.VISIBLE)
-            views.setViewVisibility(R.id.widget_competition, if (empty || height < 175 || largeFont) View.GONE else View.VISIBLE)
+            views.setViewVisibility(R.id.widget_status, if (empty) View.INVISIBLE else View.VISIBLE)
+            views.setViewVisibility(R.id.widget_competition, if (empty || contentHeight < 155 || largeFont) View.GONE else View.VISIBLE)
             state.matches.firstOrNull()?.let { match ->
-                if (!refreshing && (height < 135 || largeFont)) {
-                    views.setTextViewText(R.id.widget_footer, "${match.dateTimeLabel(now)} · $footer")
-                    views.setContentDescription(R.id.widget_footer, "开赛时间 ${match.dateTimeLabel(now)}，$footer")
-                }
-                views.setTextViewText(R.id.widget_status, if (match.live) "● ${match.status}" else if (match.terminal) match.status else "${match.dateTimeLabel(now)} 开赛")
+                views.setTextViewText(R.id.widget_footer, match.sportLabel)
+                views.setContentDescription(R.id.widget_footer, "赛事类型 ${match.sportLabel}")
+                views.setTextViewText(R.id.widget_status, if (match.live) "● ${match.status}" else if (match.terminal) match.status else "${SimpleDateFormat("MM-dd HH:mm", Locale.ROOT).format(Date(match.startsAt))}")
                 views.textColor(context, R.id.widget_status, if (match.live) R.color.widget_accent else R.color.widget_secondary)
-                views.setTextViewText(R.id.widget_competition, "${match.sportLabel} · ${match.competition.ifBlank { match.name }}")
+                views.setTextViewText(R.id.widget_competition, match.competition.ifBlank { match.name })
                 views.setTextViewText(R.id.widget_score, match.scoreLabel())
                 views.setTextViewTextSize(R.id.widget_score, TypedValue.COMPLEX_UNIT_SP, if (compact || match.scoreLabel().length > 6) 18f else 24f)
                 bindTeams(context, views, match, false)
@@ -124,11 +137,11 @@ internal object WidgetRenderer {
         views.setTextViewText(R.id.widget_row_status, when {
             match.live -> if (largeFont) match.status else "● ${match.status}"
             match.terminal -> match.status
-            else -> match.dateTimeLabel(now)
+            else -> match.widgetTime(now)
         })
         views.textColor(context, R.id.widget_row_status, if (match.live) R.color.widget_accent else R.color.widget_text)
-        views.setInt(R.id.widget_row_status, "setMaxLines", if (match.live || match.terminal || largeFont) 1 else 2)
-        views.setViewVisibility(R.id.widget_row_sport, if (largeFont || (!match.live && !match.terminal && match.dateTimeLabel(now).contains(" "))) View.GONE else View.VISIBLE)
+        views.setInt(R.id.widget_row_status, "setMaxLines", 1)
+        views.setViewVisibility(R.id.widget_row_sport, View.VISIBLE)
         views.setTextViewText(R.id.widget_row_sport, match.sportLabel)
         views.setTextViewText(R.id.widget_row_score, match.scoreLabel())
         if (match.scoreLabel().length > 6) views.setTextViewTextSize(R.id.widget_row_score, TypedValue.COMPLEX_UNIT_SP, 12f)
@@ -136,6 +149,18 @@ internal object WidgetRenderer {
         views.setContentDescription(R.id.widget_row, description(match, now))
         views.setOnClickPendingIntent(R.id.widget_row, WidgetIntents.open(context, id, match))
         return views
+    }
+
+    private fun WidgetMatch.widgetTime(now: Long): CharSequence {
+        val time = clockLabel()
+        val days = startDayOffset(now)
+        val suffix = if (days > 0) "+$days" else if (days < 0) days.toString() else ""
+        return SpannableString(time + suffix).apply {
+            if (suffix.isNotEmpty()) {
+                setSpan(SuperscriptSpan(), time.length, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                setSpan(RelativeSizeSpan(0.65f), time.length, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
     }
 
     private fun bindTeams(context: Context, views: RemoteViews, match: WidgetMatch, wide: Boolean) {

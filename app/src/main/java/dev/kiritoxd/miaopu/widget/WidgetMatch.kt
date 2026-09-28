@@ -86,3 +86,19 @@ internal fun WidgetMatch.dateTimeLabel(now: Long): String {
     val pattern = if (dayFormat.format(Date(startsAt)) == dayFormat.format(Date(now))) "HH:mm" else "MM-dd HH:mm"
     return SimpleDateFormat(pattern, Locale.ROOT).format(Date(startsAt))
 }
+
+/** Calendar days in the device timezone, including DST and month/year boundaries. */
+internal fun WidgetMatch.startDayOffset(now: Long): Int {
+    fun dayIndex(timestamp: Long): Long {
+        val local = java.util.Calendar.getInstance().apply { timeInMillis = timestamp }
+        return java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC")).apply {
+            clear()
+            set(local.get(java.util.Calendar.YEAR), local.get(java.util.Calendar.MONTH), local.get(java.util.Calendar.DAY_OF_MONTH))
+        }.timeInMillis / 86_400_000L
+    }
+    return if (startsAt > 0) (dayIndex(startsAt) - dayIndex(now)).toInt() else 0
+}
+
+internal fun WidgetMatch.clockLabel(): String = if (startsAt > 0) {
+    SimpleDateFormat("HH:mm", Locale.ROOT).format(Date(startsAt))
+} else timeLabel.ifBlank { "待定" }

@@ -41,6 +41,7 @@
             android:layout_height="match_parent"
             android:padding="6dp"
             android:src="@drawable/widget_refresh"
+                android:scaleType="centerInside"
             android:background="@android:color/transparent"
             android:contentDescription="@string/widget_refresh"/>
     </LinearLayout>

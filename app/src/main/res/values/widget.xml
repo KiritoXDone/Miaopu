@@ -4,8 +4,7 @@
     <string name="widget_schedule_name">喵扑·近期赛程</string>
     <string name="widget_match_description">查看已订阅赛事的单场比分与状态</string>
     <string name="widget_schedule_description">查看已订阅赛事的近期比赛</string>
-    <string name="widget_title">喵扑</string>
-    <string name="widget_schedule_title">喵扑 · 近期赛程</string>
+    <string name="widget_schedule_title">近期赛程</string>
     <string name="widget_refresh">刷新赛程</string>
     <string name="widget_all">全部赛程 ›</string>
     <string name="widget_loading">正在加载赛程</string>

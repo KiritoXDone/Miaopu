@@ -41,6 +41,7 @@
             android:layout_height="match_parent"
             android:padding="6dp"
             android:src="@drawable/widget_refresh"
+            android:scaleType="centerInside"
             android:background="@android:color/transparent"
             android:contentDescription="@string/widget_refresh"/>
     </LinearLayout>
@@ -52,7 +53,6 @@
         android:orientation="vertical"
         android:visibility="visible">
         <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -63,11 +63,13 @@
                 android:layout_weight="1"
                 android:gravity="center_vertical">
                 <LinearLayout
-                    android:layout_width="52dp"
+                    android:layout_width="84dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_marginEnd="2dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="44dp"
                         android:layout_height="wrap_content"
                         android:textSize="10sp"
                         android:textColor="@color/widget_text"
@@ -76,6 +78,15 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:text="进行中"/>
+                    <TextView
+                        android:layout_width="8dp"
+                        android:layout_height="wrap_content"
+                        android:text="·"
+                        android:textSize="10sp"
+                        android:textColor="@color/widget_secondary"
+                        android:includeFontPadding="false"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -86,13 +97,27 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:text="LOL"
-                        android:layout_marginTop="2dp"/>
+                        android:layout_marginStart="4dp"/>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical">
+                    android:paddingEnd="36dp"
+                    android:gravity="end|center_vertical">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="11sp"
+                        android:textColor="@color/widget_text"
+                        android:fontFamily="sans-serif"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:text="T1"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:layout_marginEnd="4dp"/>
                     <FrameLayout
                         android:layout_width="22dp"
                         android:layout_height="22dp">
@@ -115,23 +140,12 @@
                             android:background="@drawable/widget_placeholder"
                             android:importantForAccessibility="no"/>
                     </FrameLayout>
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:textSize="11sp"
-                        android:textColor="@color/widget_text"
-                        android:fontFamily="sans-serif"
-                        android:includeFontPadding="false"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:text="T1"
-                        android:layout_weight="1"
-                        android:layout_marginStart="4dp"/>
                 </LinearLayout>
                 <TextView
-                    android:layout_width="56dp"
+                    android:layout_width="44dp"
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
+                    android:translationX="-12dp"
                     android:textColor="@color/widget_text"
                     android:fontFamily="sans-serif"
                     android:includeFontPadding="false"
@@ -144,7 +158,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical">
+                    android:paddingStart="12dp"
+                    android:gravity="start|center_vertical">
                     <FrameLayout
                         android:layout_width="22dp"
                         android:layout_height="22dp">
@@ -168,7 +183,7 @@
                             android:importantForAccessibility="no"/>
                     </FrameLayout>
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="11sp"
                         android:textColor="@color/widget_text"
@@ -177,7 +192,7 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:text="GEN"
-                        android:layout_weight="1"
+                        android:maxWidth="52dp"
                         android:layout_marginStart="4dp"/>
                 </LinearLayout>
             </LinearLayout>
@@ -188,7 +203,6 @@
                 android:importantForAccessibility="no"/>
         </LinearLayout>
         <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -199,11 +213,13 @@
                 android:layout_weight="1"
                 android:gravity="center_vertical">
                 <LinearLayout
-                    android:layout_width="52dp"
+                    android:layout_width="84dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_marginEnd="2dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="44dp"
                         android:layout_height="wrap_content"
                         android:textSize="10sp"
                         android:textColor="@color/widget_text"
@@ -212,6 +228,15 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:text="20:00"/>
+                    <TextView
+                        android:layout_width="8dp"
+                        android:layout_height="wrap_content"
+                        android:text="·"
+                        android:textSize="10sp"
+                        android:textColor="@color/widget_secondary"
+                        android:includeFontPadding="false"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -222,13 +247,27 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:text="VAL"
-                        android:layout_marginTop="2dp"/>
+                        android:layout_marginStart="4dp"/>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical">
+                    android:paddingEnd="36dp"
+                    android:gravity="end|center_vertical">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="11sp"
+                        android:textColor="@color/widget_text"
+                        android:fontFamily="sans-serif"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:text="EDG"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:layout_marginEnd="4dp"/>
                     <FrameLayout
                         android:layout_width="22dp"
                         android:layout_height="22dp">
@@ -251,23 +290,12 @@
                             android:background="@drawable/widget_placeholder"
                             android:importantForAccessibility="no"/>
                     </FrameLayout>
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:textSize="11sp"
-                        android:textColor="@color/widget_text"
-                        android:fontFamily="sans-serif"
-                        android:includeFontPadding="false"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:text="EDG"
-                        android:layout_weight="1"
-                        android:layout_marginStart="4dp"/>
                 </LinearLayout>
                 <TextView
-                    android:layout_width="56dp"
+                    android:layout_width="44dp"
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
+                    android:translationX="-12dp"
                     android:textColor="@color/widget_text"
                     android:fontFamily="sans-serif"
                     android:includeFontPadding="false"
@@ -280,7 +308,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical">
+                    android:paddingStart="12dp"
+                    android:gravity="start|center_vertical">
                     <FrameLayout
                         android:layout_width="22dp"
                         android:layout_height="22dp">
@@ -304,7 +333,7 @@
                             android:importantForAccessibility="no"/>
                     </FrameLayout>
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="11sp"
                         android:textColor="@color/widget_text"
@@ -313,7 +342,7 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:text="PRX"
-                        android:layout_weight="1"
+                        android:maxWidth="52dp"
                         android:layout_marginStart="4dp"/>
                 </LinearLayout>
             </LinearLayout>
@@ -324,7 +353,6 @@
                 android:importantForAccessibility="no"/>
         </LinearLayout>
         <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -335,11 +363,13 @@
                 android:layout_weight="1"
                 android:gravity="center_vertical">
                 <LinearLayout
-                    android:layout_width="52dp"
+                    android:layout_width="84dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_marginEnd="2dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="44dp"
                         android:layout_height="wrap_content"
                         android:textSize="10sp"
                         android:textColor="@color/widget_text"
@@ -348,6 +378,15 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:text="已结束"/>
+                    <TextView
+                        android:layout_width="8dp"
+                        android:layout_height="wrap_content"
+                        android:text="·"
+                        android:textSize="10sp"
+                        android:textColor="@color/widget_secondary"
+                        android:includeFontPadding="false"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -358,13 +397,27 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:text="CS2"
-                        android:layout_marginTop="2dp"/>
+                        android:layout_marginStart="4dp"/>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical">
+                    android:paddingEnd="36dp"
+                    android:gravity="end|center_vertical">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="11sp"
+                        android:textColor="@color/widget_text"
+                        android:fontFamily="sans-serif"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:text="NAVI"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:layout_marginEnd="4dp"/>
                     <FrameLayout
                         android:layout_width="22dp"
                         android:layout_height="22dp">
@@ -387,23 +440,12 @@
                             android:background="@drawable/widget_placeholder"
                             android:importantForAccessibility="no"/>
                     </FrameLayout>
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:textSize="11sp"
-                        android:textColor="@color/widget_text"
-                        android:fontFamily="sans-serif"
-                        android:includeFontPadding="false"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:text="NAVI"
-                        android:layout_weight="1"
-                        android:layout_marginStart="4dp"/>
                 </LinearLayout>
                 <TextView
-                    android:layout_width="56dp"
+                    android:layout_width="44dp"
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
+                    android:translationX="-12dp"
                     android:textColor="@color/widget_text"
                     android:fontFamily="sans-serif"
                     android:includeFontPadding="false"
@@ -416,7 +458,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical">
+                    android:paddingStart="12dp"
+                    android:gravity="start|center_vertical">
                     <FrameLayout
                         android:layout_width="22dp"
                         android:layout_height="22dp">
@@ -440,7 +483,7 @@
                             android:importantForAccessibility="no"/>
                     </FrameLayout>
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="11sp"
                         android:textColor="@color/widget_text"
@@ -449,7 +492,7 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:text="Vitality"
-                        android:layout_weight="1"
+                        android:maxWidth="52dp"
                         android:layout_marginStart="4dp"/>
                 </LinearLayout>
             </LinearLayout>

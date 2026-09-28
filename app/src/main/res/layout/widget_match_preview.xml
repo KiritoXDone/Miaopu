@@ -1,217 +1,212 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_root"
+    android:id="@+id/widget_host"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@drawable/widget_background">
+    android:layout_height="match_parent">
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="28dp"
-        android:gravity="center_vertical">
-        <TextView
-            android:id="@+id/widget_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@color/widget_text"
-            android:fontFamily="sans-serif"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:text="@string/widget_title"
-            android:layout_weight="1"
-            android:textStyle="bold"/>
-        <ImageButton
-            android:id="@+id/widget_refresh"
-            android:layout_width="32dp"
-            android:layout_height="match_parent"
-            android:padding="6dp"
-            android:src="@drawable/widget_refresh"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/widget_refresh"/>
-    </LinearLayout>
-    <TextView
-        android:id="@+id/widget_status"
-        android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:textSize="11sp"
-        android:textColor="@color/widget_accent"
-        android:fontFamily="sans-serif"
-        android:includeFontPadding="false"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:text="进行中"
-        android:gravity="center_vertical"/>
-    <TextView
-        android:id="@+id/widget_competition"
-        android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:textSize="10sp"
-        android:textColor="@color/widget_secondary"
-        android:fontFamily="sans-serif"
-        android:includeFontPadding="false"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:text="英雄联盟 · 赛事评分"/>
-    <LinearLayout
-        android:id="@+id/widget_match_content"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:id="@+id/widget_root"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@drawable/widget_background">
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="24dp"
             android:gravity="center_vertical">
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-                <FrameLayout
-                    android:layout_width="32dp"
-                    android:layout_height="32dp">
-                    <ImageView
-                        android:id="@+id/widget_logo_0"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="fitCenter"
-                        android:importantForAccessibility="no"/>
-                    <TextView
-                        android:id="@+id/widget_fallback_0"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:textSize="16sp"
-                        android:textColor="@color/widget_accent"
-                        android:fontFamily="sans-serif"
-                        android:includeFontPadding="false"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:text="T"
-                        android:gravity="center"
-                        android:background="@drawable/widget_placeholder"
-                        android:importantForAccessibility="no"/>
-                </FrameLayout>
-                <TextView
-                    android:id="@+id/widget_team_0"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="11sp"
-                    android:textColor="@color/widget_text"
-                    android:fontFamily="sans-serif"
-                    android:includeFontPadding="false"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:text="T1"
-                    android:gravity="center"
-                    android:layout_marginTop="4dp"/>
-            </LinearLayout>
             <TextView
-                android:id="@+id/widget_score"
-                android:layout_width="wrap_content"
+                android:id="@+id/widget_status"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:textColor="@color/widget_text"
+                android:textSize="10sp"
+                android:textColor="@color/widget_accent"
                 android:fontFamily="sans-serif"
                 android:includeFontPadding="false"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:text="1 : 1"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp"
-                android:textStyle="bold"
-                android:gravity="center"/>
+                android:text="进行中"
+                android:gravity="center_vertical"/>
+            <ImageButton
+                android:id="@+id/widget_refresh"
+                android:layout_width="32dp"
+                android:layout_height="match_parent"
+                android:padding="4dp"
+                android:src="@drawable/widget_refresh"
+                android:scaleType="centerInside"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/widget_refresh"/>
+        </LinearLayout>
+        <TextView
+            android:id="@+id/widget_competition"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:textSize="10sp"
+            android:textColor="@color/widget_secondary"
+            android:fontFamily="sans-serif"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="英雄联盟 · 赛事评分"/>
+        <LinearLayout
+            android:id="@+id/widget_match_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-                <FrameLayout
-                    android:layout_width="32dp"
-                    android:layout_height="32dp">
-                    <ImageView
-                        android:id="@+id/widget_logo_1"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="fitCenter"
-                        android:importantForAccessibility="no"/>
+                android:gravity="center_vertical">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <FrameLayout
+                        android:layout_width="32dp"
+                        android:layout_height="32dp">
+                        <ImageView
+                            android:id="@+id/widget_logo_0"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitCenter"
+                            android:importantForAccessibility="no"/>
+                        <TextView
+                            android:id="@+id/widget_fallback_0"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:textSize="16sp"
+                            android:textColor="@color/widget_accent"
+                            android:fontFamily="sans-serif"
+                            android:includeFontPadding="false"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:text="T"
+                            android:gravity="center"
+                            android:background="@drawable/widget_placeholder"
+                            android:importantForAccessibility="no"/>
+                    </FrameLayout>
                     <TextView
-                        android:id="@+id/widget_fallback_1"
+                        android:id="@+id/widget_team_0"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:textSize="16sp"
-                        android:textColor="@color/widget_accent"
+                        android:layout_height="wrap_content"
+                        android:textSize="11sp"
+                        android:textColor="@color/widget_text"
                         android:fontFamily="sans-serif"
                         android:includeFontPadding="false"
                         android:maxLines="1"
                         android:ellipsize="end"
-                        android:text="G"
+                        android:text="T1"
                         android:gravity="center"
-                        android:background="@drawable/widget_placeholder"
-                        android:importantForAccessibility="no"/>
-                </FrameLayout>
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
                 <TextView
-                    android:id="@+id/widget_team_1"
-                    android:layout_width="match_parent"
+                    android:id="@+id/widget_score"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="11sp"
+                    android:textSize="24sp"
                     android:textColor="@color/widget_text"
                     android:fontFamily="sans-serif"
                     android:includeFontPadding="false"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:text="GEN"
+                    android:text="1 : 1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:textStyle="bold"
+                    android:gravity="center"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:layout_marginTop="4dp"/>
+                    android:orientation="vertical">
+                    <FrameLayout
+                        android:layout_width="32dp"
+                        android:layout_height="32dp">
+                        <ImageView
+                            android:id="@+id/widget_logo_1"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitCenter"
+                            android:importantForAccessibility="no"/>
+                        <TextView
+                            android:id="@+id/widget_fallback_1"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:textSize="16sp"
+                            android:textColor="@color/widget_accent"
+                            android:fontFamily="sans-serif"
+                            android:includeFontPadding="false"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:text="G"
+                            android:gravity="center"
+                            android:background="@drawable/widget_placeholder"
+                            android:importantForAccessibility="no"/>
+                    </FrameLayout>
+                    <TextView
+                        android:id="@+id/widget_team_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="11sp"
+                        android:textColor="@color/widget_text"
+                        android:fontFamily="sans-serif"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:text="GEN"
+                        android:gravity="center"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-    <TextView
-        android:id="@+id/widget_empty"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:textSize="13sp"
-        android:textColor="@color/widget_secondary"
-        android:fontFamily="sans-serif"
-        android:includeFontPadding="false"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:text="@string/widget_loading"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:visibility="gone"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:gravity="center_vertical">
         <TextView
-            android:id="@+id/widget_footer"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textSize="9sp"
+            android:id="@+id/widget_empty"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:textSize="13sp"
             android:textColor="@color/widget_secondary"
             android:fontFamily="sans-serif"
             android:includeFontPadding="false"
             android:maxLines="1"
             android:ellipsize="end"
-            android:text="已订阅赛事"
-            android:layout_weight="1"/>
-        <TextView
-            android:id="@+id/widget_open"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@color/widget_secondary"
-            android:fontFamily="sans-serif"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:text="›"/>
+            android:text="@string/widget_loading"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:visibility="gone"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/widget_footer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textSize="9sp"
+                android:textColor="@color/widget_secondary"
+                android:fontFamily="sans-serif"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="已订阅赛事"
+                android:layout_weight="1"/>
+            <TextView
+                android:id="@+id/widget_open"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/widget_secondary"
+                android:fontFamily="sans-serif"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="›"/>
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</FrameLayout>

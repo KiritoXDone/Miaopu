@@ -181,7 +181,7 @@ internal object WidgetRenderer {
     }
 
     private fun description(match: WidgetMatch, now: Long) =
-        "${match.sportLabel}，${match.competition}，${match.dateTimeLabel(now)}，${match.teams.joinToString(" 对 ") { it.name }.ifBlank { match.name }}，${match.status}，${match.scoreLabel()}，查看${if (match.hasRatings) "比赛详情" else "赛程"}"
+        "${match.sportLabel}，${match.competition}，${match.dateTimeLabel(now)}，${match.teams.joinToString(" 对 ") { it.name }.ifBlank { match.name }}，${match.status}，${match.scoreLabel()}，查看比赛详情"
 
     private fun RemoteViews.textColor(context: Context, viewId: Int, color: Int) {
         if (Build.VERSION.SDK_INT >= 31) setColor(viewId, "setTextColor", color)

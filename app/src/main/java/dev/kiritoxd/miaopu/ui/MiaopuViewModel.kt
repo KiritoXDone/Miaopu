@@ -62,6 +62,7 @@ class MiaopuViewModel(
     private val cookieSession = HupuCookieSession(application).also { it.restore() }
     private val adapter = HupuAdapter(cookieSession)
     private val releaseAdapter = GitHubReleaseAdapter()
+    internal val matchDetail = MatchDetailController(viewModelScope, adapter::getStageRatingDetail)
     internal val commentReplies = CommentRepliesController(viewModelScope, adapter)
     private val subscriptionStore = EsportSubscriptionStore(application)
     private val initialSubscriptions = subscriptionStore.subscriptions()
@@ -139,7 +140,7 @@ class MiaopuViewModel(
         val ratingsMatch = screens.filterIsInstance<AppScreen.Ratings>().lastOrNull()?.match
             ?: stageScreen?.match
         if (ratingState is LoadState.Loading) {
-            ratingsMatch?.toModel()?.let { loadRatings(it, autoOpenSingleStage = false) }
+            ratingsMatch?.toModel()?.let { loadRatings(it) }
         }
         if (stageRatingState is LoadState.Loading) {
             stageScreen?.let { loadStageRating(it.match.toModel(), it.stage.toModel()) }
@@ -400,6 +401,7 @@ class MiaopuViewModel(
     }
 
     fun latestRatingTarget(target: RatingTarget): RatingTarget {
+        matchDetail.latestTarget(target)?.let { return it }
         val detail = (ratingState as? LoadState.Ready)?.value ?: return target
         return detail.stages
             .asSequence()
@@ -453,7 +455,10 @@ class MiaopuViewModel(
             isPublishingComment = false
             saveCommentDraft("")
         }
-        if (current is AppScreen.Ratings) ratingJob?.cancel()
+        if (current is AppScreen.Ratings) {
+            ratingJob?.cancel()
+            matchDetail.close()
+        }
         if (current is AppScreen.Stage) stageRatingJob?.cancel()
         navigator?.pop()
     }
@@ -491,32 +496,13 @@ class MiaopuViewModel(
         scheduleStates = scheduleStates + (esport to state)
     }
 
-    private fun loadRatings(match: MatchSummary, autoOpenSingleStage: Boolean = true) {
+    private fun loadRatings(match: MatchSummary) {
+        matchDetail.bind(match)
         ratingJob?.cancel()
         ratingState = LoadState.Loading
         ratingJob = viewModelScope.launch {
             val nextState = adapter.getRatings(match).toLoadState()
-            if (navigator?.containsMatch(match.id) == true) {
-                ratingState = nextState
-                val detail = (nextState as? LoadState.Ready)?.value
-                if (
-                    autoOpenSingleStage &&
-                    (screen as? AppScreen.Ratings)?.match?.id == match.id &&
-                    detail?.stages?.size == 1
-                ) {
-                    val stage = detail.stages.single()
-                    stageViewports.remove(stageViewportKey(match, stage))
-                    navigator?.replace(
-                        AppScreen.Stage(
-                            match = match.toRoute(),
-                            stage = stage.toRoute(),
-                            stageNumber = 1,
-                            returnToStagePicker = false,
-                        ),
-                    )
-                    loadStageRating(match, stage)
-                }
-            }
+            if (navigator?.containsMatch(match.id) == true) ratingState = nextState
         }
     }
 
@@ -578,6 +564,7 @@ class MiaopuViewModel(
                 candidate
             }
 
+        matchDetail.updateTargets(::update)
         (ratingState as? LoadState.Ready)?.value?.let { detail ->
             ratingState = LoadState.Ready(
                 detail.copy(

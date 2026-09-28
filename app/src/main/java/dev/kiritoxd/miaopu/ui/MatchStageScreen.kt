@@ -65,7 +65,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-private enum class StageTargetOrder(val label: String) {
+internal enum class StageTargetOrder(val label: String) {
     HOT("热门"), LATEST("最新"), HIGH_SCORE("高分"), LOW_SCORE("低分"),
 }
 
@@ -143,19 +143,9 @@ private fun StageRatingContent(
     val selectedTab = tabs[currentTabIndex]
     val selectedOrder = StageTargetOrder.entries[currentOrderIndex]
     val visibleTargets = remember(selectedTab, selectedOrder) {
-        when (selectedOrder) {
-            StageTargetOrder.HOT -> selectedTab.targets
-            StageTargetOrder.LATEST -> selectedTab.targets.sortedByDescending { it.nodeId ?: Long.MIN_VALUE }
-            StageTargetOrder.HIGH_SCORE -> selectedTab.targets.sortedWith(
-                compareByDescending<RatingTarget> { it.scoreAverage }.thenByDescending { it.scoreCount },
-            )
-            StageTargetOrder.LOW_SCORE -> selectedTab.targets.sortedWith(
-                compareBy<RatingTarget> { if (it.scoreCount == 0) 1 else 0 }
-                    .thenBy { it.scoreAverage }
-                    .thenByDescending { it.scoreCount },
-            )
-        }
+        orderRatingTargets(selectedTab.targets, selectedOrder)
     }
+
     val restoredViewport = savedViewport?.coerceFor(
         tabCount = tabs.size,
         orderCount = StageTargetOrder.entries.size,
@@ -235,7 +225,7 @@ private fun StageRatingContent(
 }
 
 @Composable
-private fun CompactOrderSelector(selectedIndex: Int, onSelected: (Int) -> Unit) {
+internal fun CompactOrderSelector(selectedIndex: Int, onSelected: (Int) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
         StageTargetOrder.entries.forEachIndexed { index, order ->
             val selected = index == selectedIndex
@@ -315,7 +305,7 @@ private fun StageOverview(
 }
 
 @Composable
-private fun OfficialRatingTargetCard(target: RatingTarget, onClick: () -> Unit) {
+internal fun OfficialRatingTargetCard(target: RatingTarget, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).semantics {
             role = Role.Button

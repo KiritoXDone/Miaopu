@@ -40,6 +40,6 @@ class MainActivity : ComponentActivity() {
         if (intent.action != WidgetIntents.OPEN) return
         val businessId = intent.getStringExtra(WidgetIntents.BUSINESS_ID)
         val match = WidgetScheduleStore(this).find(businessId, intent.getStringExtra(WidgetIntents.MATCH_ID))
-        viewModel.openWidgetDestination(match?.takeIf { it.hasRatings }?.toModel(), EsportCatalog.byBusinessId(businessId))
+        viewModel.openWidgetDestination(match?.toModel(), EsportCatalog.byBusinessId(businessId))
     }
 }

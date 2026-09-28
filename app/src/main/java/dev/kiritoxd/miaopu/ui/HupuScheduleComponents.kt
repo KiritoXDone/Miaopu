@@ -226,26 +226,19 @@ internal fun ScheduleDayBand(day: ScheduleDay, isFocused: Boolean) {
 
 @Composable
 internal fun HupuScheduleMatchCard(match: MatchSummary, onClick: () -> Unit) {
-    val canOpen = match.hasRatings
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
-            .then(
-                if (canOpen) {
-                    Modifier.semantics {
-                        role = Role.Button
-                        contentDescription = "查看 ${match.name.ifBlank { match.teams.joinToString(" 对 ") { it.name } }}"
-                    }
-                } else {
-                    Modifier
-                },
-            ),
+            .semantics {
+                role = Role.Button
+                contentDescription = "查看 ${match.name.ifBlank { match.teams.joinToString(" 对 ") { it.name } }}"
+            },
         insideMargin = PaddingValues(horizontal = 14.dp, vertical = 13.dp),
         cornerRadius = 16.dp,
-        onClick = if (canOpen) onClick else null,
-        pressFeedbackType = if (canOpen) PressFeedbackType.Sink else PressFeedbackType.None,
-        showIndication = canOpen,
+        onClick = onClick,
+        pressFeedbackType = PressFeedbackType.Sink,
+        showIndication = true,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -360,6 +353,3 @@ private fun statusColor(match: MatchSummary): Color = when {
     match.isTerminal -> MiuixTheme.colorScheme.onSurfaceVariantSummary
     else -> MiuixTheme.colorScheme.onSurface
 }
-
-private val MatchSummary.hasRatings: Boolean
-    get() = !outBizType.isNullOrBlank() && !outBizNo.isNullOrBlank()

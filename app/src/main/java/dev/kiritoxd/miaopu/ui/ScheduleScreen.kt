@@ -60,7 +60,6 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ContactsCircle
@@ -536,15 +535,11 @@ private fun EventsHeader(
 @Composable
 private fun EsportSelector(viewModel: MiaopuViewModel, selectedEsport: Esport) {
     val subscriptions = EsportCatalog.all.filter { it in viewModel.subscribedEsports }
-    TabRow(
-        tabs = subscriptions.map { it.shortTitle },
-        selectedTabIndex = subscriptions.indexOf(selectedEsport).coerceAtLeast(0),
-        onTabSelected = { viewModel.selectEsport(subscriptions[it]) },
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        colors = dataSourceTabRowColors(),
-        minWidth = 80.dp,
-        maxWidth = 96.dp,
-        itemSpacing = 8.dp,
+    DetailTabs(
+        labels = subscriptions.map { it.shortTitle },
+        selected = subscriptions.indexOf(selectedEsport).coerceAtLeast(0),
+        style = DetailTabStyle.PAGE,
+        onSelect = { viewModel.selectEsport(subscriptions[it]) },
     )
 }
 

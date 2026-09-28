@@ -100,10 +100,13 @@ internal fun DetailTabs(
 }
 
 @Composable
-internal fun DetailOrderSelector(selected: Int, onSelect: (Int) -> Unit) {
+internal fun DetailOrderSelector(
+    selected: Int, labels: List<String> = StageTargetOrder.entries.map { it.label },
+    onSelect: (Int) -> Unit,
+) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp).selectableGroup(), horizontalArrangement = Arrangement.End) {
-        StageTargetOrder.entries.forEachIndexed { index, order ->
-            Text(order.label, modifier = Modifier.clip(RoundedCornerShape(8.dp))
+        labels.forEachIndexed { index, label ->
+            Text(label, modifier = Modifier.clip(RoundedCornerShape(8.dp))
                 .selectable(index == selected, role = Role.Tab, onClick = { onSelect(index) })
                 .padding(horizontal = 9.dp, vertical = 4.dp), fontSize = 11.sp,
                 color = if (index == selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary)

@@ -1,377 +1,87 @@
 package dev.kiritoxd.miaopu.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import dev.kiritoxd.miaopu.data.CommentPage
 import dev.kiritoxd.miaopu.data.HupuComment
 import dev.kiritoxd.miaopu.data.nestedReplyTarget
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.*
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-internal fun PlayerCommentCard(
-    comment: HupuComment,
-    expanded: Boolean,
-    repliesState: LoadState<CommentPage>?,
-    isLoadingMoreReplies: Boolean,
-    replyPaginationError: String?,
-    onToggleReplies: () -> Unit,
-    onRetryReplies: () -> Unit,
-    onLoadMoreReplies: () -> Unit,
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        insideMargin = PaddingValues(16.dp),
-        cornerRadius = 20.dp,
-    ) {
-        CommentAuthor(comment)
-        Spacer(Modifier.height(12.dp))
-        SelectableCommentText(
-            text = comment.content,
-            style = MiuixTheme.textStyles.body1,
-        )
-        CommentImages(comment.imageUrls)
-
-        if (expanded) {
-            ExpandedReplies(
-                state = repliesState,
-                fallback = comment.previewReplies,
-                rootCommentId = comment.id,
-                isLoadingMore = isLoadingMoreReplies,
-                paginationError = replyPaginationError,
-                onRetry = onRetryReplies,
-                onLoadMore = onLoadMoreReplies,
-            )
-        } else {
-            comment.previewReplies.firstOrNull()?.let { reply ->
-                PreviewReply(reply, rootCommentId = comment.id)
-            }
-        }
-
-        Spacer(Modifier.height(11.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = listOfNotNull(comment.date.takeIf(String::isNotBlank), comment.location).joinToString(" · "),
-                modifier = Modifier.weight(1f),
-                style = MiuixTheme.textStyles.footnote2,
-                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-            )
-            if (
-                shouldShowReplyToggle(
-                    replyCount = comment.replyCount,
-                    hasPreview = comment.previewReplies.isNotEmpty(),
-                    expanded = expanded,
-                )
-            ) {
-                TextButton(
-                    text = if (expanded) "收起回复" else "${comment.replyCount} 条回复",
-                    onClick = onToggleReplies,
-                    modifier = Modifier.width(96.dp),
-                    minWidth = 96.dp,
-                    minHeight = 32.dp,
-                    insideMargin = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
-                    textStyle = MiuixTheme.textStyles.footnote2,
-                )
+internal fun PlayerCommentCard(comment: HupuComment, actions: CommentActionsController, onLike: () -> Unit, onReply: () -> Unit, onReplies: () -> Unit) {
+    Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 12.dp).clickable(onClick = onReply),
+        insideMargin = PaddingValues(14.dp), cornerRadius = 18.dp) {
+        CommentRow(comment, actions = actions, onLike = onLike, onReply = onReply)
+        if (comment.previewReplies.isNotEmpty() || actions.replyCount(comment) > 0) {
+            Column(Modifier.padding(start = 44.dp, top = 7.dp).fillMaxWidth().clip(RoundedCornerShape(10.dp))
+                .background(MiuixTheme.colorScheme.surface).clickable(onClick = onReplies).padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                comment.previewReplies.firstOrNull()?.let {
+                    Text("${it.author}：${it.content}", fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("查看全部 ${maxOf(actions.replyCount(comment), comment.previewReplies.size)} 条回复", fontSize = 12.sp, color = MiuixTheme.colorScheme.primary)
+                    Icon(LucideIcons.ChevronRight, null, Modifier.size(14.dp), tint = MiuixTheme.colorScheme.primary)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun CommentAuthor(comment: HupuComment) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        CommentAvatar(comment, 40)
+internal fun CommentRow(comment: HupuComment, root: HupuComment? = null, actions: CommentActionsController, onLike: () -> Unit, onReply: (() -> Unit)? = null, metadataAbove: Boolean = false) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+        Box(Modifier.size(34.dp).clip(CircleShape).background(MiuixTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+            if (comment.avatarUrl.isNullOrBlank()) Text(comment.author.take(1), fontSize = 13.sp, color = MiuixTheme.colorScheme.primary)
+            else AsyncImage(comment.avatarUrl, "${comment.author}头像", Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        }
         Spacer(Modifier.width(10.dp))
-        Column(Modifier.weight(1f)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = comment.author,
-                        modifier = Modifier.weight(1f, fill = false),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.Bold,
-                        style = MiuixTheme.textStyles.body1,
-                    )
-                    comment.badge?.name?.takeIf(String::isNotBlank)?.let { badgeName ->
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = badgeName,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.primary,
-                        )
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.weight(1f).padding(end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(comment.author, Modifier.weight(1f, fill = false), fontSize = 12.sp,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    val author = root?.authorId?.takeIf(String::isNotBlank)?.let { it == comment.authorId } == true
+                    val badge = if (author) "作者" else if (comment.score > 0) "${comment.score}分" else comment.badge?.name
+                    badge?.takeIf(String::isNotBlank)?.let {
+                        Text(it, Modifier.padding(start = 5.dp).background(MiuixTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(5.dp))
+                            .padding(horizontal = 5.dp, vertical = 1.dp), fontSize = 10.sp, color = MiuixTheme.colorScheme.primary)
                     }
                 }
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "👍 ${comment.lightCount}",
-                    style = MiuixTheme.textStyles.footnote2,
-                    color = if (comment.hasLight) {
-                        MiuixTheme.colorScheme.primary
-                    } else {
-                        MiuixTheme.colorScheme.onSurfaceVariantSummary
-                    },
-                )
-            }
-            RatingStars(comment.score)
-        }
-    }
-}
-
-@Composable
-private fun RatingStars(score: Int) {
-    val filledStars = (score / 2).coerceIn(0, 5)
-    Text(
-        text = buildString {
-            repeat(filledStars) { append('★') }
-            repeat(5 - filledStars) { append('☆') }
-        },
-        style = MiuixTheme.textStyles.footnote1,
-        color = MiuixTheme.colorScheme.primary,
-    )
-}
-
-@Composable
-private fun ExpandedReplies(
-    state: LoadState<CommentPage>?,
-    fallback: List<HupuComment>,
-    rootCommentId: String,
-    isLoadingMore: Boolean,
-    paginationError: String?,
-    onRetry: () -> Unit,
-    onLoadMore: () -> Unit,
-) {
-    Spacer(Modifier.height(10.dp))
-    RepliesSurface {
-        when (state) {
-            null, LoadState.Loading -> {
-                val preview = fallback.firstOrNull()
-                if (preview != null) {
-                    ReplyRow(preview, rootCommentId)
-                } else {
-                    Text(
-                        text = "正在加载完整回复…",
-                        style = MiuixTheme.textStyles.footnote1,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                    )
-                }
-            }
-            is LoadState.Failed -> {
-                fallback.firstOrNull()?.let { ReplyRow(it, rootCommentId) }
-                Text(
-                    text = state.message,
-                    style = MiuixTheme.textStyles.footnote1,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                )
-                if (state.retryable) {
-                    Button(
-                        onClick = onRetry,
-                        colors = ButtonDefaults.buttonColorsPrimary(),
-                    ) {
-                        Text("重试展开")
+                val like = actions.like(comment)
+                IconButton(onClick = onLike, enabled = !like.pending, minWidth = 44.dp, minHeight = 32.dp) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        val tint = if (like.selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary
+                        Icon(LucideIcons.ThumbsUp, if (like.selected) "取消点赞" else "点赞", Modifier.size(16.dp), tint = tint)
+                        Text("${like.count}", fontSize = 11.sp, color = tint)
                     }
                 }
             }
-            is LoadState.Ready -> {
-                val page = state.value
-                if (page.comments.isEmpty()) {
-                    Text(
-                        text = "暂无可见回复",
-                        style = MiuixTheme.textStyles.footnote1,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                    )
-                } else {
-                    page.comments.forEach { ReplyRow(it, rootCommentId) }
-                }
-                when {
-                    paginationError != null -> {
-                        Text(
-                            text = paginationError,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                        )
-                        TextButton(
-                            text = "重试加载更多",
-                            onClick = onLoadMore,
-                            modifier = Modifier.width(96.dp),
-                            minWidth = 96.dp,
-                            minHeight = 32.dp,
-                            insideMargin = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
-                            textStyle = MiuixTheme.textStyles.footnote2,
-                        )
-                    }
-                    page.hasMore && page.nextPublishTime != null -> TextButton(
-                        text = if (isLoadingMore) "加载中…" else "加载更多回复",
-                        onClick = onLoadMore,
-                        enabled = !isLoadingMore,
-                        modifier = Modifier.width(96.dp),
-                        minWidth = 96.dp,
-                        minHeight = 32.dp,
-                        insideMargin = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
-                        textStyle = MiuixTheme.textStyles.footnote2,
-                    )
-                }
-            }
+            val repliedTo = if (root != null) comment.nestedReplyTarget(root.id)
+                ?: root.author.takeIf { comment.parentCommentId == root.id } else null
+            val metadata = listOfNotNull(repliedTo?.let { "回复 $it" }, comment.date.takeIf(String::isNotBlank),
+                comment.location?.takeIf(String::isNotBlank)).joinToString(" · ")
+            if (metadataAbove && metadata.isNotBlank()) Text(metadata, fontSize = 11.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+            Text(comment.content, modifier = if (onReply != null) Modifier.clickable(onClick = onReply) else Modifier, fontSize = 14.sp)
+            CommentImages(comment.imageUrls)
+            if (!metadataAbove && metadata.isNotBlank()) Text(metadata, fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
         }
     }
 }
 
-@Composable
-private fun PreviewReply(reply: HupuComment, rootCommentId: String) {
-    Spacer(Modifier.height(10.dp))
-    RepliesSurface {
-        ReplyRow(reply, rootCommentId)
-    }
-}
-
-@Composable
-private fun RepliesSurface(content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(MiuixTheme.colorScheme.surfaceVariant)
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        content()
-    }
-}
-
-@Composable
-private fun ReplyRow(reply: HupuComment, rootCommentId: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-    ) {
-        CommentAvatar(reply, 30)
-        Spacer(Modifier.width(8.dp))
-        Column(Modifier.weight(1f)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = replyAuthorLabel(reply, rootCommentId),
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MiuixTheme.textStyles.footnote1,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "👍 ${reply.lightCount}",
-                    style = MiuixTheme.textStyles.footnote2,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                )
-            }
-            Spacer(Modifier.height(2.dp))
-            SelectableCommentText(
-                text = reply.content,
-                style = MiuixTheme.textStyles.footnote1,
-            )
-            CommentImages(reply.imageUrls)
-            val metadata = listOfNotNull(reply.date.takeIf(String::isNotBlank), reply.location).joinToString(" · ")
-            if (metadata.isNotBlank()) {
-                Spacer(Modifier.height(3.dp))
-                Text(
-                    text = metadata,
-                    style = MiuixTheme.textStyles.footnote2,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SelectableCommentText(
-    text: String,
-    style: TextStyle,
-) {
-    SelectionContainer {
-        Text(
-            text = text,
-            style = style,
-        )
-    }
-}
-
-private fun replyAuthorLabel(reply: HupuComment, rootCommentId: String): String =
-    reply.nestedReplyTarget(rootCommentId)?.let { "${reply.author} 回复 $it" } ?: reply.author
-
-internal fun shouldShowReplyToggle(
-    replyCount: Int,
-    hasPreview: Boolean,
-    expanded: Boolean,
-): Boolean = expanded || replyCount > 1 || (replyCount == 1 && !hasPreview)
-
-@Composable
-private fun CommentAvatar(comment: HupuComment, sizeDp: Int) {
-    Box(
-        modifier = Modifier
-            .size(sizeDp.dp)
-            .clip(CircleShape)
-            .background(MiuixTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (comment.avatarUrl.isNullOrBlank()) {
-            Text(
-                comment.author.take(1),
-                style = MiuixTheme.textStyles.footnote1,
-                color = MiuixTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-            )
-        } else {
-            AsyncImage(
-                model = comment.avatarUrl,
-                contentDescription = "${comment.author}头像",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
-        }
-    }
-}
+internal fun shouldShowReplyToggle(replyCount: Int, hasPreview: Boolean, expanded: Boolean): Boolean =
+    expanded || replyCount > 1 || (replyCount == 1 && !hasPreview)

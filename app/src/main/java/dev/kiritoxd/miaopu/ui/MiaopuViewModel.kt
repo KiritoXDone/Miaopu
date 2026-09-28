@@ -64,6 +64,7 @@ class MiaopuViewModel(
     private val releaseAdapter = GitHubReleaseAdapter()
     internal val matchDetail = MatchDetailController(viewModelScope, adapter::getStageRatingDetail)
     internal val commentReplies = CommentRepliesController(viewModelScope, adapter)
+    internal val commentActions = CommentActionsController(viewModelScope, adapter::setCommentLight, adapter::publishReply) { message = it }
     private val subscriptionStore = EsportSubscriptionStore(application)
     private val initialSubscriptions = subscriptionStore.orderedSubscriptions()
     private var navigator: MiaopuNavigator? = null
@@ -406,6 +407,13 @@ class MiaopuViewModel(
         }
     }
 
+    internal fun commentMatchLabel(): String? {
+        val match = navigator?.backStack?.filterIsInstance<AppScreen.Ratings>()?.lastOrNull()?.match?.toModel() ?: return null
+        return match.teams.joinToString(" : ") { team ->
+            listOfNotNull(team.name, team.bigScore ?: team.score).joinToString(" ")
+        }.takeIf(String::isNotBlank)
+    }
+
     fun latestRatingTarget(target: RatingTarget): RatingTarget {
         matchDetail.latestTarget(target)?.let { return it }
         val detail = (ratingState as? LoadState.Ready)?.value ?: return target
@@ -456,6 +464,7 @@ class MiaopuViewModel(
             moreCommentsJob = null
             commentPaginationGate.invalidate()
             commentReplies.clear()
+            commentActions.clear()
             isLoadingMoreComments = false
             commentPaginationError = null
             isPublishingComment = false

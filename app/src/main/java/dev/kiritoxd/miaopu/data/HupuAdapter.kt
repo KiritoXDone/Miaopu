@@ -248,6 +248,21 @@ class HupuAdapter(
         }
     }
 
+    suspend fun publishReply(target: RatingTarget, parentId: String, content: String): AdapterResult<Unit> =
+        writeCommentAction("publish", CommentWritePayloads.reply(target, parentId, content))
+
+    suspend fun setCommentLight(comment: HupuComment, light: Boolean): AdapterResult<Unit> =
+        writeCommentAction(if (light) "light" else "cancelLight", CommentWritePayloads.light(comment.id, comment.subjectId))
+
+    private suspend fun writeCommentAction(action: String, body: String): AdapterResult<Unit> {
+        val source = "hupu.comment.$action"
+        if (!cookieSession.isAuthenticated()) return AdapterResult.failure(
+            source, AdapterStatus.AUTH_REQUIRED, "请先登录虎扑", false,
+        )
+        val response = request("https://games.mobileapi.hupu.com/1/8.2.58/bplcommentapi/bpl/comment/$action", "POST", body)
+        return withContext(Dispatchers.Default) { response.toAdapterResult(source, ::parseWriteResponse) }
+    }
+
     private suspend fun <T> getAndParse(
         endpoint: String,
         source: String,

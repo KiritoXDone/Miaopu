@@ -11,8 +11,6 @@ import androidx.compose.ui.unit.dp
 import dev.kiritoxd.miaopu.data.MatchSummary
 import dev.kiritoxd.miaopu.data.RatingTarget
 import top.yukonga.miuix.kmp.basic.*
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -43,7 +41,7 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
                 title = "比赛详情",
                 navigationIcon = {
                     IconButton(onClick = viewModel::goBack) {
-                        Icon(MiuixIcons.ChevronBackward, contentDescription = "返回赛事")
+                        Icon(LucideIcons.ChevronLeft, contentDescription = "返回赛事")
                     }
                 },
             )

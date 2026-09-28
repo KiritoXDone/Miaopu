@@ -31,8 +31,6 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -73,7 +71,7 @@ fun HupuWebScreen(
                 subtitle = if (login) "仅在虎扑官方页面输入账号信息" else "虎扑官方互动页面",
                 navigationIcon = {
                     IconButton(onClick = ::navigateBack) {
-                        Icon(MiuixIcons.ChevronBackward, contentDescription = "返回")
+                        Icon(LucideIcons.ChevronLeft, contentDescription = "返回")
                     }
                 },
                 actions = {

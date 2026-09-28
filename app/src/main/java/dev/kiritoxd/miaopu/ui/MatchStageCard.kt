@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -25,6 +26,7 @@ import dev.kiritoxd.miaopu.data.RatingStage
 import dev.kiritoxd.miaopu.data.RatingTarget
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
@@ -69,11 +71,12 @@ fun MatchStageCard(
             }
             Spacer(Modifier.width(10.dp))
             Text(
-                text = "查看  ›",
+                text = "查看",
                 style = MiuixTheme.textStyles.footnote1,
                 color = MiuixTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
             )
+            Icon(LucideIcons.ChevronRight, null, Modifier.size(16.dp), tint = MiuixTheme.colorScheme.primary)
         }
         if (playerPreviews.isNotEmpty()) {
             Spacer(Modifier.height(14.dp))

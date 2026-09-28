@@ -42,9 +42,9 @@ internal fun SubscriptionGroup(
                 }
                 if (sorting) {
                     IconButton(onClick = { onMove(sport, -1) }, enabled = index > 0, minWidth = 28.dp, minHeight = 40.dp,
-                        modifier = Modifier.semantics { contentDescription = "上移${sport.title}" }) { Text("↑", fontSize = 16.sp) }
+                        modifier = Modifier.semantics { contentDescription = "上移${sport.title}" }) { Icon(LucideIcons.ArrowUp, null, Modifier.size(18.dp)) }
                     IconButton(onClick = { onMove(sport, 1) }, enabled = index < sports.lastIndex, minWidth = 28.dp, minHeight = 40.dp,
-                        modifier = Modifier.semantics { contentDescription = "下移${sport.title}" }) { Text("↓", fontSize = 16.sp) }
+                        modifier = Modifier.semantics { contentDescription = "下移${sport.title}" }) { Icon(LucideIcons.ArrowDown, null, Modifier.size(18.dp)) }
                     Box(Modifier.size(36.dp).semantics { contentDescription = "长按拖动${sport.title}排序" }
                         .pointerInput(sport, rowPixels) {
                             var distance = 0f
@@ -53,15 +53,15 @@ internal fun SubscriptionGroup(
                                 if (distance >= rowPixels) { currentMove(sport, 1); distance -= rowPixels }
                                 if (distance <= -rowPixels) { currentMove(sport, -1); distance += rowPixels }
                             })
-                        }, contentAlignment = Alignment.Center) { Text("≡", color = MiuixTheme.colorScheme.onSurfaceVariantSummary) }
+                        }, contentAlignment = Alignment.Center) { Icon(LucideIcons.GripVertical, null, Modifier.size(20.dp), tint = MiuixTheme.colorScheme.onSurfaceVariantSummary) }
                 } else {
                     val active = sport in subscribed
                     IconButton(onClick = { onToggle(sport) }, modifier = Modifier.semantics {
                         contentDescription = "${if (active) "取消订阅" else "订阅"}${sport.title}"
                     }) {
                         Box(Modifier.size(24.dp).background(if (active) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.primary.copy(alpha = 0.08f), CircleShape), contentAlignment = Alignment.Center) {
-                            Text(if (active) "✓" else "+", fontSize = 18.sp,
-                                color = if (active) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.primary)
+                            Icon(if (active) LucideIcons.Check else LucideIcons.Plus, null, Modifier.size(18.dp),
+                                tint = if (active) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.primary)
                         }
                     }
                 }

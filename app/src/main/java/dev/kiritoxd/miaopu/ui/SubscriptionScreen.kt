@@ -12,8 +12,6 @@ import androidx.compose.ui.unit.sp
 import dev.kiritoxd.miaopu.data.*
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.*
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -39,7 +37,7 @@ fun SubscriptionScreen(viewModel: MiaopuViewModel) {
     }
     Scaffold(containerColor = MiuixTheme.colorScheme.surface, topBar = {
         SmallTopAppBar(title = "赛事订阅", navigationIcon = {
-            IconButton(onClick = viewModel::goBack) { Icon(MiuixIcons.ChevronBackward, "返回我的") }
+            IconButton(onClick = viewModel::goBack) { Icon(LucideIcons.ChevronLeft, "返回我的") }
         })
     }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 20.dp),

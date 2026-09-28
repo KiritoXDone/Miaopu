@@ -1,6 +1,5 @@
 package dev.kiritoxd.miaopu.ui
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,9 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
@@ -57,13 +55,8 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 internal enum class StageTargetOrder(val label: String) {
     HOT("热门"), LATEST("最新"), HIGH_SCORE("高分"), LOW_SCORE("低分"),
@@ -87,7 +80,7 @@ fun MatchStageScreen(
                 subtitle = if (showStageNumber) "第 $stageNumber 局 · ${stage.name}" else stage.name,
                 navigationIcon = {
                     IconButton(onClick = viewModel::goBack) {
-                        Icon(MiuixIcons.ChevronBackward, contentDescription = "返回赛事详情")
+                        Icon(LucideIcons.ChevronLeft, contentDescription = "返回赛事详情")
                     }
                 },
             )
@@ -391,37 +384,16 @@ internal fun OfficialRatingTargetCard(target: RatingTarget, onClick: () -> Unit)
 @Composable
 private fun FractionalRatingStars(scoreAverage: Double, scoreCount: Int) {
     val outlineColor = MiuixTheme.colorScheme.onSurfaceVariantSummary
-    val fillFractions = ratingStarFillFractions(scoreAverage, scoreCount)
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(12.dp)
-            .semantics {
-                contentDescription = if (scoreCount > 0) {
-                    "平均评分 %.1f 分".format(scoreAverage)
-                } else {
-                    "暂无评分"
-                }
-            },
-    ) {
-        val starSize = size.height
-        val gap = ((size.width - starSize * 5) / 4).coerceAtLeast(0f)
-        fillFractions.forEachIndexed { index, fraction ->
-            val left = index * (starSize + gap)
-            val path = starPath(
-                centerX = left + starSize / 2,
-                centerY = starSize / 2,
-                outerRadius = starSize / 2,
-            )
-            drawPath(
-                path = path,
-                color = outlineColor,
-                style = Stroke(width = 1.dp.toPx()),
-            )
-            if (fraction > 0f) {
-                clipRect(left = left, right = left + starSize * fraction) {
-                    drawPath(path = path, color = HupuScoreBlue)
-                }
+    Row(Modifier.fillMaxWidth().semantics {
+        contentDescription = if (scoreCount > 0) "平均评分 %.1f 分".format(scoreAverage) else "暂无评分"
+    }, horizontalArrangement = Arrangement.SpaceBetween) {
+        ratingStarFillFractions(scoreAverage, scoreCount).forEach { fraction ->
+            Box(Modifier.size(12.dp)) {
+                Icon(LucideIcons.Star, null, Modifier.fillMaxSize(), tint = outlineColor)
+                if (fraction > 0f) Icon(LucideIcons.StarFilled, null,
+                    Modifier.fillMaxSize().drawWithContent {
+                        clipRect(right = size.width * fraction) { this@drawWithContent.drawContent() }
+                    }, tint = HupuScoreBlue)
             }
         }
     }
@@ -430,18 +402,6 @@ private fun FractionalRatingStars(scoreAverage: Double, scoreCount: Int) {
 internal fun ratingStarFillFractions(scoreAverage: Double, scoreCount: Int): List<Float> {
     val starScore = if (scoreCount > 0) (scoreAverage / 2).coerceIn(0.0, 5.0) else 0.0
     return List(5) { index -> (starScore - index).coerceIn(0.0, 1.0).toFloat() }
-}
-
-private fun starPath(centerX: Float, centerY: Float, outerRadius: Float): Path = Path().apply {
-    val innerRadius = outerRadius * 0.46f
-    repeat(10) { point ->
-        val radius = if (point % 2 == 0) outerRadius else innerRadius
-        val angle = -PI / 2 + point * PI / 5
-        val x = centerX + cos(angle).toFloat() * radius
-        val y = centerY + sin(angle).toFloat() * radius
-        if (point == 0) moveTo(x, y) else lineTo(x, y)
-    }
-    close()
 }
 
 private val HupuScoreBlue = Color(0xFF28A4ED)

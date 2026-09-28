@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -61,12 +62,6 @@ import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.ContactsCircle
-import top.yukonga.miuix.kmp.icon.extended.Home
-import top.yukonga.miuix.kmp.icon.extended.Refresh
-import top.yukonga.miuix.kmp.icon.extended.Search
-import top.yukonga.miuix.kmp.icon.extended.Tasks
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
@@ -284,19 +279,19 @@ private fun MainNavigationBar(
         NavigationBarItem(
             selected = selected == MainSection.HOME,
             onClick = { onSelect(MainSection.HOME) },
-            icon = MiuixIcons.Home,
+            icon = LucideIcons.House,
             label = "首页",
         )
         NavigationBarItem(
             selected = selected == MainSection.EVENTS,
             onClick = { onSelect(MainSection.EVENTS) },
-            icon = MiuixIcons.Tasks,
+            icon = LucideIcons.CalendarDays,
             label = "赛事",
         )
         NavigationBarItem(
             selected = selected == MainSection.PROFILE,
             onClick = { onSelect(MainSection.PROFILE) },
-            icon = MiuixIcons.ContactsCircle,
+            icon = LucideIcons.CircleUserRound,
             label = "我的",
         )
     }
@@ -475,7 +470,7 @@ private fun HomeHeader(viewModel: MiaopuViewModel) {
                 onClick = viewModel::refreshHomeSchedules,
                 backgroundColor = MiuixTheme.colorScheme.surfaceContainer,
             ) {
-                Icon(MiuixIcons.Refresh, contentDescription = "刷新赛程")
+                Icon(LucideIcons.RefreshCw, contentDescription = "刷新赛程")
             }
         },
     )
@@ -499,7 +494,7 @@ private fun EventsHeader(
                     backgroundColor = MiuixTheme.colorScheme.surfaceContainer,
                 ) {
                     Icon(
-                        MiuixIcons.Search,
+                        LucideIcons.Search,
                         contentDescription = if (searchExpanded) "关闭搜索" else "搜索赛程",
                     )
                 }
@@ -508,7 +503,7 @@ private fun EventsHeader(
                     onClick = viewModel::refreshSchedule,
                     backgroundColor = MiuixTheme.colorScheme.surfaceContainer,
                 ) {
-                    Icon(MiuixIcons.Refresh, contentDescription = "刷新赛程")
+                    Icon(LucideIcons.RefreshCw, contentDescription = "刷新赛程")
                 }
             }
         },
@@ -576,7 +571,7 @@ private fun ProfileContent(viewModel: MiaopuViewModel, innerPadding: PaddingValu
                             color = MiuixTheme.colorScheme.onPrimary.copy(alpha = 0.72f),
                         )
                     }
-                    Text("🐱", style = MiuixTheme.textStyles.title1)
+                    Icon(LucideIcons.CircleUserRound, null, Modifier.size(32.dp))
                 }
                 Spacer(Modifier.height(18.dp))
                 Button(
@@ -618,11 +613,12 @@ private fun ProfileContent(viewModel: MiaopuViewModel, innerPadding: PaddingValu
                         )
                     }
                     Text(
-                        "管理  ›",
+                        "管理",
                         style = MiuixTheme.textStyles.footnote1,
                         color = MiuixTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                     )
+                    Icon(LucideIcons.ChevronRight, null, Modifier.size(16.dp), tint = MiuixTheme.colorScheme.primary)
                 }
             }
         }
@@ -641,9 +637,9 @@ private fun ProfileContent(viewModel: MiaopuViewModel, innerPadding: PaddingValu
                 summary = summary,
                 action = when (updateState) {
                     UpdateCheckState.Checking -> "检查中"
-                    is UpdateCheckState.Available -> "下载 ›"
-                    is UpdateCheckState.Failed -> "重试 ›"
-                    else -> "检查 ›"
+                    is UpdateCheckState.Available -> "下载"
+                    is UpdateCheckState.Failed -> "重试"
+                    else -> "检查"
                 },
                 enabled = updateState != UpdateCheckState.Checking,
                 onClick = {
@@ -659,7 +655,7 @@ private fun ProfileContent(viewModel: MiaopuViewModel, innerPadding: PaddingValu
             ProfileActionCard(
                 title = "关于",
                 summary = "github.com/KiritoXDone/Miaopu · ${viewModel.currentVersion}",
-                action = "查看 ›",
+                action = "查看",
                 onClick = { uriHandler.openUri(viewModel.repositoryUrl) },
             )
         }
@@ -710,6 +706,7 @@ private fun ProfileActionCard(
                 },
                 fontWeight = FontWeight.Bold,
             )
+            Icon(LucideIcons.ChevronRight, null, Modifier.size(16.dp), tint = if (enabled) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary)
         }
     }
 }

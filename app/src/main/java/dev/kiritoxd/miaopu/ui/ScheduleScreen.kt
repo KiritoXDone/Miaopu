@@ -73,7 +73,7 @@ import top.yukonga.miuix.kmp.utils.PressFeedbackType
 @Composable
 fun ScheduleScreen(viewModel: MiaopuViewModel) {
     val sections = MainSection.entries
-    val subscriptions = EsportCatalog.all.filter { it in viewModel.subscribedEsports }
+    val subscriptions = viewModel.subscribedEsports
     val pagerState = rememberPagerState(
         initialPage = viewModel.selectedMainSection.ordinal,
         pageCount = { sections.size },
@@ -534,7 +534,7 @@ private fun EventsHeader(
 
 @Composable
 private fun EsportSelector(viewModel: MiaopuViewModel, selectedEsport: Esport) {
-    val subscriptions = EsportCatalog.all.filter { it in viewModel.subscribedEsports }
+    val subscriptions = viewModel.subscribedEsports
     DetailTabs(
         labels = subscriptions.map { it.shortTitle },
         selected = subscriptions.indexOf(selectedEsport).coerceAtLeast(0),

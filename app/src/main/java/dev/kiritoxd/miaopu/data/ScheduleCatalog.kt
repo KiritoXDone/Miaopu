@@ -165,5 +165,10 @@ object EsportCatalog {
         return resolved.ifEmpty { linkedSetOf(Esport.LOL) }
     }
 
+    fun orderedSubscriptions(savedBusinessIds: Set<String>?, savedOrder: List<String>): List<Esport> {
+        val subscribed = subscriptions(savedBusinessIds)
+        return (savedOrder.mapNotNull(::byBusinessId).filter { it in subscribed } + subscribed).distinct()
+    }
+
     fun byBusinessId(id: String?): Esport? = all.firstOrNull { it.businessId == id }
 }

@@ -6,6 +6,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class EsportCatalogTest {
+    @Test fun savedOrderRetainsOnlySubscribedProjectsAndAppendsNewOnes() {
+        assertEquals(listOf(Esport.VALORANT, Esport.LOL, Esport.KOG),
+            EsportCatalog.orderedSubscriptions(setOf("lol", "kog", "val"), listOf("val", "unknown", "val", "cs2", "lol")))
+        assertEquals(EsportCatalog.subscriptions(null).toList(), EsportCatalog.orderedSubscriptions(null, emptyList()))
+        assertEquals(listOf(Esport.LOL), EsportCatalog.orderedSubscriptions(emptySet(), listOf("val")))
+    }
+
     @Test
     fun defaultSubscriptionsContainEveryVerifiedScheduleProject() {
         assertEquals(

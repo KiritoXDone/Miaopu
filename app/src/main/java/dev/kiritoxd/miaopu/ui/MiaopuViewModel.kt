@@ -65,7 +65,7 @@ class MiaopuViewModel(
     internal val matchDetail = MatchDetailController(viewModelScope, adapter::getStageRatingDetail)
     internal val commentReplies = CommentRepliesController(viewModelScope, adapter)
     private val subscriptionStore = EsportSubscriptionStore(application)
-    private val initialSubscriptions = subscriptionStore.subscriptions()
+    private val initialSubscriptions = subscriptionStore.orderedSubscriptions()
     private var navigator: MiaopuNavigator? = null
     private var pendingWidgetDestination: Pair<MatchSummary?, Esport?>? = null
     private val schedules = mutableMapOf<Esport, Schedule>()
@@ -75,7 +75,7 @@ class MiaopuViewModel(
     private val commentPaginationGate = TargetRequestGate()
 
     internal val screen: AppScreen get() = navigator?.currentScreen ?: AppScreen.Schedule
-    var subscribedEsports: Set<Esport> by mutableStateOf(initialSubscriptions)
+    var subscribedEsports: List<Esport> by mutableStateOf(initialSubscriptions)
         private set
     var selectedEsport: Esport by mutableStateOf(subscriptionStore.selected(initialSubscriptions))
         private set
@@ -173,9 +173,7 @@ class MiaopuViewModel(
             return
         }
 
-        val nextIds = subscribedEsports.mapTo(mutableSetOf()) { it.businessId }
-        if (esport in subscribedEsports) nextIds.remove(esport.businessId) else nextIds.add(esport.businessId)
-        val next = EsportCatalog.all.filterTo(linkedSetOf()) { it.businessId in nextIds }
+        val next = if (esport in subscribedEsports) subscribedEsports - esport else subscribedEsports + esport
         val removed = subscribedEsports - next
         removed.forEach { removedEsport -> scheduleJobs.remove(removedEsport)?.cancel() }
         subscribedEsports = next
@@ -188,6 +186,14 @@ class MiaopuViewModel(
             subscriptionStore.saveSelected(selectedEsport)
         }
         loadSubscribedSchedules()
+    }
+
+    fun moveSubscription(esport: Esport, direction: Int) {
+        val from = subscribedEsports.indexOf(esport)
+        val to = from + direction
+        if (from < 0 || to !in subscribedEsports.indices) return
+        subscribedEsports = subscribedEsports.toMutableList().apply { add(to, removeAt(from)) }
+        subscriptionStore.saveSubscriptions(subscribedEsports)
     }
 
     fun selectMainSection(section: MainSection) {

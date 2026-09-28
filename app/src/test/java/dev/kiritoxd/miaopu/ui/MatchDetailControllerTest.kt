@@ -19,6 +19,7 @@ class MatchDetailControllerTest {
                 requested = matchId to businessType
                 return scoreResult(matchId)
             }
+            override suspend fun playerScores(matchId: String, game: Esport) = scoreResult(matchId)
             override suspend fun stats(matchId: String, mapId: String) = stats(mapId)
         }
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
@@ -26,6 +27,25 @@ class MatchDetailControllerTest {
             controller(scope, source).bind(parsed)
             assertEquals("against", parsed.matchType)
             assertEquals("cs-bo3" to "common_match", requested)
+        } finally { scope.cancel() }
+    }
+
+    @Test fun lolAndKogUseTheirPlayerScoreSource() = runBlocking {
+        val calls = mutableListOf<Pair<String, Esport>>()
+        val source = object : MatchDetailSource {
+            override suspend fun allScores(matchId: String, businessType: String): AdapterResult<MatchAllScores> = error("Wrong source")
+            override suspend fun playerScores(matchId: String, game: Esport): AdapterResult<MatchAllScores> {
+                calls += matchId to game
+                return scoreResult(game.title)
+            }
+            override suspend fun stats(matchId: String, mapId: String) = stats(mapId)
+        }
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        try {
+            val controller = controller(scope, source)
+            controller.bind(match("lol-id").copy(esport = Esport.LOL, matchType = "against"))
+            controller.bind(match("kog-id").copy(esport = Esport.KOG, matchType = "against"))
+            assertEquals(listOf("lol-id" to Esport.LOL, "kog-id" to Esport.KOG), calls)
         } finally { scope.cancel() }
     }
 
@@ -159,6 +179,7 @@ class MatchDetailControllerTest {
         stats: suspend (String, String) -> AdapterResult<MatchStats> = { _, id -> stats(id) },
     ) = object : MatchDetailSource {
         override suspend fun allScores(matchId: String, businessType: String) = scores(matchId)
+        override suspend fun playerScores(matchId: String, game: Esport) = scores(matchId)
         override suspend fun stats(matchId: String, mapId: String) = stats.invoke(matchId, mapId)
     }
     private fun scoreResult(name: String) = AdapterResult.success("fixture", MatchAllScores(listOf(ScoredTeam(name, null, emptyList()))))

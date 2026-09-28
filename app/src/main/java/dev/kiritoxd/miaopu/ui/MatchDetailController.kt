@@ -3,6 +3,7 @@ package dev.kiritoxd.miaopu.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import dev.kiritoxd.miaopu.data.Esport
 import dev.kiritoxd.miaopu.data.AdapterResult
 import dev.kiritoxd.miaopu.data.RatingTarget
 import dev.kiritoxd.miaopu.data.matchdetail.MatchDetailSource
@@ -95,7 +96,10 @@ internal class MatchDetailController(
         summaryJob?.cancel()
         summary = LoadState.Loading
         summaryJob = scope.launch {
-            val result = adapter.allScores(current.id, "common_match")
+            val result = when (current.esport) {
+                Esport.LOL, Esport.KOG -> adapter.playerScores(current.id, current.esport)
+                else -> adapter.allScores(current.id, "common_match")
+            }
             if (token == summaryGeneration && matchToken == generation) summary = result.detailState()
         }
     }

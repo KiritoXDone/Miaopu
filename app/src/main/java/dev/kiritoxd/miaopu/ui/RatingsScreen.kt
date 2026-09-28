@@ -60,13 +60,8 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
                 DetailTabs(listOf("评分", "数据"), activePage, style = DetailTabStyle.PAGE) { page = it }
             }
             if (activePage == 0) {
-                item(key = "summary") {
-                    when (val state = detail.summary) {
-                        LoadState.Loading -> DetailNotice("正在加载全场评分", loading = true)
-                        is LoadState.Failed -> DetailNotice(state.message, onRetry = detail::loadSummary)
-                        is LoadState.Ready -> AllMatchScoreCard(state.value)
-                    }
-                }
+                val summary = (detail.summary as? LoadState.Ready)?.value
+                if (summary?.hasScores == true) item(key = "summary") { AllMatchScoreCard(summary) }
                 when (val state = viewModel.ratingState) {
                     LoadState.Loading -> item { DetailNotice("正在加载单局评分", loading = true) }
                     is LoadState.Failed -> item {

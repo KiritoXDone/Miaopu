@@ -1,5 +1,6 @@
 package dev.kiritoxd.miaopu.data.matchdetail
 
+import dev.kiritoxd.miaopu.data.Esport
 import dev.kiritoxd.miaopu.data.AdapterResult
 import dev.kiritoxd.miaopu.data.AdapterStatus
 import kotlinx.coroutines.Dispatchers
@@ -12,6 +13,7 @@ import java.net.URLEncoder
 /** Read-only public endpoints; no session cookie or captured device credentials. */
 internal interface MatchDetailSource {
     suspend fun allScores(matchId: String, businessType: String): AdapterResult<MatchAllScores>
+    suspend fun playerScores(matchId: String, game: Esport): AdapterResult<MatchAllScores>
     suspend fun stats(matchId: String, mapId: String): AdapterResult<MatchStats>
 }
 
@@ -20,6 +22,12 @@ internal class MatchDetailAdapter : MatchDetailSource {
         "https://match-api.hupu.com/1/8.2.58/matchallapi/queryMatchAllScoreInfo" +
             "?businessType=${encode(businessType)}&matchId=${encode(matchId)}", MatchDetailParser::allScores,
     )
+
+    override suspend fun playerScores(matchId: String, game: Esport): AdapterResult<MatchAllScores> {
+        require(game == Esport.LOL || game == Esport.KOG)
+        return get("https://games.mobileapi.hupu.com/1/8.2.58/player/v1/${game.businessId}/getAllPlayerScore" +
+            "?matchId=${encode(matchId)}", MatchDetailParser::playerScores)
+    }
 
     override suspend fun stats(matchId: String, mapId: String): AdapterResult<MatchStats> = get(
         "https://match-api.hupu.com/1/8.0.0/matchallapi/stat/queryMatchStatsByMatchInfo/v2" +

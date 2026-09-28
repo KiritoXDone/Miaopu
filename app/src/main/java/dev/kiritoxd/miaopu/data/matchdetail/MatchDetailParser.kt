@@ -28,6 +28,23 @@ internal object MatchDetailParser {
         })
     }
 
+    fun playerScores(body: String): MatchAllScores {
+        val root = JSONObject(body)
+        check(root.optInt("code") == 1) { "暂时无法读取全场评分" }
+        val data = root.optJSONObject("data") ?: return MatchAllScores(emptyList())
+        val info = data.optJSONObject("matchInfo")
+        val teams = data.optJSONArray("teamScoreInfo")?.objects().orEmpty()
+        return MatchAllScores(teams.sortedBy { if (it.optBoolean("home")) 0 else 1 }.mapIndexed { index, team ->
+            val side = if (team.has("home")) { if (team.optBoolean("home")) 1 else 2 } else index + 1
+            val players = team.optJSONArray("playerInfo")?.objects().orEmpty().mapNotNull { player ->
+                val name = player.text("playerName") ?: return@mapNotNull null
+                val score = player.text("playerScore")?.toDoubleOrNull()?.takeIf { it.isFinite() && it > 0 && it <= 10 }
+                PlayerAllScore(name, score?.let { String.format(java.util.Locale.ROOT, "%.1f", it) } ?: "—", null, null)
+            }
+            ScoredTeam(info?.text("team${side}_name").orEmpty(), info?.text("team${side}_logo"), players)
+        })
+    }
+
     fun stats(body: String): MatchStats {
         val blocks = result(body).optJSONArray("stats")?.objects()
             ?: error("比赛数据格式已变化")

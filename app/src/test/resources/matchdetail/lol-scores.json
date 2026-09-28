@@ -1,0 +1,105 @@
+{
+  "code": 1,
+  "data": {
+    "teamScoreInfo": [
+      {
+        "teamId": 2,
+        "home": true,
+        "playerInfo": [
+          {
+            "playerId": 5,
+            "playerName": "Meiko",
+            "playerScore": 9.4,
+            "playerScoreNum": 30752,
+            "playerLocation": "SUP",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 63,
+            "playerName": "Rookie",
+            "playerScore": 9.7,
+            "playerScoreNum": 36430,
+            "playerLocation": "MID",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 1478,
+            "playerName": "TheShy",
+            "playerScore": 7.3,
+            "playerScoreNum": 54450,
+            "playerLocation": "TOP",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 2153,
+            "playerName": "Wei",
+            "playerScore": 9.0,
+            "playerScoreNum": 33481,
+            "playerLocation": "JUN",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 736562126028800,
+            "playerName": "JiaQi",
+            "playerScore": 9.5,
+            "playerScoreNum": 32899,
+            "playerLocation": "BOT",
+            "isSubstitution": false
+          }
+        ]
+      },
+      {
+        "teamId": 29,
+        "home": false,
+        "playerInfo": [
+          {
+            "playerId": 2005,
+            "playerName": "GALA",
+            "playerScore": 5.2,
+            "playerScoreNum": 14898,
+            "playerLocation": "BOT",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 2998,
+            "playerName": "JunJia",
+            "playerScore": 4.4,
+            "playerScoreNum": 14715,
+            "playerLocation": "JUN",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 107406175,
+            "playerName": "Xiaoxu",
+            "playerScore": 3.0,
+            "playerScoreNum": 11980,
+            "playerLocation": "TOP",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 229588804730880,
+            "playerName": "Vampire",
+            "playerScore": 6.5,
+            "playerScoreNum": 9349,
+            "playerLocation": "SUP",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 853996081561600,
+            "playerName": "HongQ",
+            "playerScore": 2.8,
+            "playerScoreNum": 12417,
+            "playerLocation": "MID",
+            "isSubstitution": false
+          }
+        ]
+      }
+    ],
+    "matchInfo": {
+      "team1_name": "IG",
+      "team1_logo": "https://i5.hoopchina.com.cn/eg-game/lol/game/team/pic/2145023b2c88b9ccfd897088e96bdb959prod.png",
+      "team2_name": "JDG",
+      "team2_logo": "https://i1.hoopchina.com.cn/eg-game/lol/game/team/pic/29eb187c78eaa54820615b21724aa7e795prod.png"
+    }
+  }
+}

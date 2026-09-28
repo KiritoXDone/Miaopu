@@ -13,3 +13,8 @@ Source: `https://match-api.hupu.com/1/8.2.58/matchallapi/`, paths
 The production statistics adapter uses the compatible `8.0.0` endpoint.
 
 - `cs-bo3-{0,1,2,3}.json`: Aurora–Vitality, match `1441778164564984097`, maps 3/2/1 in API order; captured from the production `8.0.0` statistics endpoint.
+
+- `lol-scores.json`: IG–JDG, match `1614397062610944`, public `player/v1/lol/getAllPlayerScore` response.
+- `kog-scores.json`: Malaysia–China, match `1660521316794368`, public `player/v1/kog/getAllPlayerScore` response, including substitutes.
+
+The two player-score fixtures retain only the response code, team rosters and team names/logos. The endpoints were identified from the user's Reqable export and fetched again without captured headers or cookies.

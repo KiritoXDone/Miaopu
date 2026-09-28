@@ -72,6 +72,52 @@ class MatchDetailParserTest {
         assertEquals("—", data.teams[0].players.first { it.name == "substitute" }.score)
     }
 
+    @Test fun summaryIsHiddenWithoutAnyReturnedScore() {
+        assertFalse(MatchDetailParser.allScores("""{"success":true,"result":{}}""").hasScores)
+        val root = JSONObject(fixture("scores"))
+        val groups = root.getJSONObject("result").getJSONArray("memberScoreInfos")
+        fun removeScores(array: JSONArray) {
+            for (index in 0 until array.length()) when (val entry = array.opt(index)) {
+                is JSONArray -> removeScores(entry)
+                is JSONObject -> entry.remove("memberAllAvgScore")
+            }
+        }
+        removeScores(groups)
+        assertFalse(MatchDetailParser.allScores(root.toString()).hasScores)
+        assertTrue(MatchDetailParser.allScores(fixture("scores")).hasScores)
+    }
+
+    @Test fun lolSummaryUsesHomeAwayTeamsAndActualPlayerScores() {
+        val data = MatchDetailParser.playerScores(fixture("lol-scores"))
+        assertTrue(data.hasScores)
+        assertEquals(listOf("IG", "JDG"), data.teams.map { it.name })
+        assertEquals(listOf(5, 5), data.teams.map { it.players.size })
+        assertEquals("9.7", data.teams.first().players.single { it.name == "Rookie" }.score)
+        val root = JSONObject(fixture("lol-scores"))
+        val teams = root.getJSONObject("data").getJSONArray("teamScoreInfo")
+        val first = teams.getJSONObject(0)
+        teams.put(0, teams.getJSONObject(1))
+        teams.put(1, first)
+        assertEquals(listOf("IG", "JDG"), MatchDetailParser.playerScores(root.toString()).teams.map { it.name })
+    }
+
+    @Test fun kogSummaryRetainsSubstitutesAndMissingDataStaysHidden() {
+        val data = MatchDetailParser.playerScores(fixture("kog-scores"))
+        assertEquals(listOf("马来西亚", "中国"), data.teams.map { it.name })
+        assertEquals(listOf(6, 6), data.teams.map { it.players.size })
+        assertTrue(data.hasScores)
+        assertFalse(MatchDetailParser.playerScores("""{"code":1,"data":null}""").hasScores)
+        assertFalse(MatchDetailParser.playerScores("""{"code":1,"data":{"teamScoreInfo":[]}}""").hasScores)
+        val invalid = MatchAllScores(listOf(ScoredTeam("unknown", null,
+            listOf("—", "0", "NaN", "11", "-1").map { PlayerAllScore("player", it, null, null) })))
+        assertFalse(invalid.hasScores)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun playerSummaryRejectsServiceFailure() {
+        MatchDetailParser.playerScores("""{"code":0,"data":null}""")
+    }
+
     @Test fun emptyStatsAreValid() {
         val data = MatchDetailParser.stats("""{"success":true,"result":{"stats":[]}}""")
         assertTrue(data.maps.isEmpty())

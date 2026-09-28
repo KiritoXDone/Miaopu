@@ -11,6 +11,8 @@ data class StatsTeam(
     val columns: List<String>,
     val players: List<List<StatsCell>>,
 )
-data class MatchAllScores(val teams: List<ScoredTeam>)
+data class MatchAllScores(val teams: List<ScoredTeam>) {
+    val hasScores: Boolean get() = teams.any { team -> team.players.any { it.score.toDoubleOrNull()?.let { score -> score.isFinite() && score > 0 && score <= 10 } == true } }
+}
 data class ScoredTeam(val name: String, val logoUrl: String?, val players: List<PlayerAllScore>)
 data class PlayerAllScore(val name: String, val score: String, val dayColor: String?, val nightColor: String?)

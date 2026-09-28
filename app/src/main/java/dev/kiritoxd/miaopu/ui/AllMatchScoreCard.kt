@@ -21,7 +21,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 internal fun AllMatchScoreCard(scores: MatchAllScores) {
-    if (scores.teams.all { it.players.isEmpty() }) return
+    if (!scores.hasScores) return
     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), cornerRadius = 18.dp,
         insideMargin = PaddingValues(12.dp)) {
         Text("全场评分", fontSize = 16.sp, fontWeight = FontWeight.Bold)

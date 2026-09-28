@@ -1,0 +1,121 @@
+{
+  "code": 1,
+  "data": {
+    "teamScoreInfo": [
+      {
+        "teamId": 146885760,
+        "home": true,
+        "playerInfo": [
+          {
+            "playerId": 1655282580701184,
+            "playerName": "N.NG",
+            "playerScore": 8.8,
+            "playerScoreNum": 810,
+            "playerLocation": "TOP",
+            "isSubstitution": true
+          },
+          {
+            "playerId": 1655288198545408,
+            "playerName": "T.CHEN",
+            "playerScore": 8.7,
+            "playerScoreNum": 1595,
+            "playerLocation": "JUN",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 1655289168281600,
+            "playerName": "C.LIM",
+            "playerScore": 8.7,
+            "playerScoreNum": 1604,
+            "playerLocation": "MID",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 1655290805895168,
+            "playerName": "R.NA",
+            "playerScore": 9.3,
+            "playerScoreNum": 3343,
+            "playerLocation": "BOT",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 1655291455995904,
+            "playerName": "H.CHONG",
+            "playerScore": 9.0,
+            "playerScoreNum": 1571,
+            "playerLocation": "SUP",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 1655286549708800,
+            "playerName": "H.LEE",
+            "playerScore": 9.2,
+            "playerScoreNum": 826,
+            "playerLocation": "TOP",
+            "isSubstitution": false
+          }
+        ]
+      },
+      {
+        "teamId": 988440498,
+        "home": false,
+        "playerInfo": [
+          {
+            "playerId": 1655206471483392,
+            "playerName": "徐必成",
+            "playerScore": 9.7,
+            "playerScoreNum": 20538,
+            "playerLocation": "BOT",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 1655208094695424,
+            "playerName": "何伟嘉",
+            "playerScore": 9.6,
+            "playerScoreNum": 10368,
+            "playerLocation": "JUN",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 1655208684732416,
+            "playerName": "孟家俊",
+            "playerScore": 9.2,
+            "playerScoreNum": 11125,
+            "playerLocation": "SUP",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 1655210650222592,
+            "playerName": "赵昊宇",
+            "playerScore": 9.6,
+            "playerScoreNum": 5634,
+            "playerLocation": "TOP",
+            "isSubstitution": true
+          },
+          {
+            "playerId": 1655211027169280,
+            "playerName": "黄垚钦",
+            "playerScore": 9.5,
+            "playerScoreNum": 17026,
+            "playerLocation": "MID",
+            "isSubstitution": false
+          },
+          {
+            "playerId": 1655207807238144,
+            "playerName": "王科",
+            "playerScore": 9.5,
+            "playerScoreNum": 5830,
+            "playerLocation": "TOP",
+            "isSubstitution": false
+          }
+        ]
+      }
+    ],
+    "matchInfo": {
+      "team1_name": "马来西亚",
+      "team1_logo": "http://p1.hoopchina.com.cn/eg/lol/game/team/pic/146885760.png",
+      "team2_name": "中国",
+      "team2_logo": "http://p1.hoopchina.com.cn/eg/lol/game/team/pic/988440498.png"
+    }
+  }
+}

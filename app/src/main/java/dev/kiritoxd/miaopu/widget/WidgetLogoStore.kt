@@ -17,7 +17,7 @@ import java.io.File
 import java.security.MessageDigest
 
 internal class WidgetLogoStore(private val context: Context) {
-    private val directory = File(context.cacheDir, "widget-logos")
+    private val directory = File(context.cacheDir, "widget-logos-v2")
 
     fun cached(url: String?): Bitmap? {
         if (url.isNullOrBlank()) return null
@@ -36,7 +36,8 @@ internal class WidgetLogoStore(private val context: Context) {
                             val result = SingletonImageLoader.get(context).execute(
                                 ImageRequest.Builder(context).data(url).size(96).allowHardware(false).build(),
                             )
-                            val bitmap = result.image?.toBitmap(96, 96) ?: return@withTimeoutOrNull
+                            // Keep the decoded aspect ratio so ImageView can center wide flags and tall crests.
+                            val bitmap = result.image?.toBitmap() ?: return@withTimeoutOrNull
                             // Atomically replace a complete thumbnail; never expose a partial PNG to a renderer.
                             val temporary = File.createTempFile("logo", ".tmp", directory)
                             try {

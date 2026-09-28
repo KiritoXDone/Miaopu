@@ -94,7 +94,6 @@ dependencies {
     implementation("androidx.navigationevent:navigationevent-compose:1.1.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.4-rc01")
-    implementation("top.yukonga.miuix.kmp:miuix-icons-android:0.9.4-rc01")
     implementation("top.yukonga.miuix.kmp:miuix-nav-android:0.9.4-rc01")
     implementation("io.coil-kt.coil3:coil-compose:3.5.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.5.0")

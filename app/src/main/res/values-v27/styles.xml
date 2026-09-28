@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Miaopu" parent="Theme.Miaopu.Base">
+        <item name="android:navigationBarDividerColor">@android:color/transparent</item>
+    </style>
+</resources>

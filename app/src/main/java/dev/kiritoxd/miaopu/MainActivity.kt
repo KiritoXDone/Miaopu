@@ -1,6 +1,9 @@
 package dev.kiritoxd.miaopu
 
 import android.os.Bundle
+import android.os.Build
+import android.graphics.Color
+import androidx.activity.SystemBarStyle
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,7 +23,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT))
+        if (Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+        if (Build.VERSION.SDK_INT >= 28) window.navigationBarDividerColor = Color.TRANSPARENT
         if (savedInstanceState == null) handleWidgetIntent(intent)
         setContent { MiaopuApp(viewModel) }
     }

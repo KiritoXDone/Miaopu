@@ -20,6 +20,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import android.os.Build
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,8 +59,6 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
 
@@ -139,6 +142,16 @@ internal fun CommentImageViewer(
             decorFitsSystemWindows = false,
         ),
     ) {
+        val dialogView = LocalView.current
+        SideEffect {
+            (dialogView.parent as? DialogWindowProvider)?.window?.let { dialogWindow ->
+                @Suppress("DEPRECATION")
+                dialogWindow.navigationBarColor = android.graphics.Color.TRANSPARENT
+                if (Build.VERSION.SDK_INT >= 28) dialogWindow.navigationBarDividerColor = android.graphics.Color.TRANSPARENT
+                if (Build.VERSION.SDK_INT >= 29) dialogWindow.isNavigationBarContrastEnforced = false
+                WindowCompat.getInsetsController(dialogWindow, dialogView).isAppearanceLightNavigationBars = false
+            }
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -175,7 +188,7 @@ internal fun CommentImageViewer(
                     minHeight = 48.dp,
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Close,
+                        imageVector = LucideIcons.X,
                         contentDescription = "关闭图片预览",
                         tint = Color.White,
                     )

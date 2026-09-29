@@ -22,7 +22,6 @@ import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
 import top.yukonga.miuix.kmp.nav.core.rememberNavSystemCornerRadius
-import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
@@ -42,15 +41,17 @@ fun MiaopuApp(viewModel: MiaopuViewModel) {
             val backdropColor = MiuixTheme.colorScheme.surface
             val navEffects = remember(cornerRadius, backdropColor) {
                 NavDisplayEffects(
+                    enableCornerClip = false,
                     cornerClipRadius = cornerRadius,
                     backdropColor = backdropColor,
                 )
             }
+            val navigationMotion = rememberMiaopuNavigationMotion(cornerRadius)
             NavDisplay(
                 backStack = backStack,
                 modifier = Modifier.fillMaxSize(),
                 onBack = viewModel::goBack,
-                transition = NavTransitions.MiuixDefault,
+                transition = navigationMotion,
                 effects = navEffects,
             ) {
                 entry<AppScreen.Schedule>(contentKey = { it.navigationContentKey }) { ScheduleScreen(viewModel) }

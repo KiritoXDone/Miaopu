@@ -159,6 +159,8 @@ class MiaopuViewModel(
         if (scheduleStateFor(esport) !is LoadState.Ready) loadSchedule(esport = esport)
     }
 
+    internal fun cachedScheduleFor(esport: Esport): Schedule? = schedules[esport]
+
     internal fun scheduleStateFor(esport: Esport): LoadState<Schedule> =
         scheduleStates[esport]
             ?: schedules[esport]?.let { LoadState.Ready(it) }
@@ -217,9 +219,11 @@ class MiaopuViewModel(
         }
     }
 
-    fun refreshSchedule() {
+    fun refreshSchedule() = refreshScheduleFor(selectedEsport)
+
+    internal fun refreshScheduleFor(esport: Esport) {
         adapter.invalidateSharedScheduleCache()
-        loadSchedule(force = true)
+        loadSchedule(esport = esport, force = true)
     }
 
     fun refreshHomeSchedules() {

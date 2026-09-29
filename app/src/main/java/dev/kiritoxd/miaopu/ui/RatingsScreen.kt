@@ -36,8 +36,15 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
     val selectedGroup = if (groups.isEmpty()) 0 else groupIndex.coerceIn(groups.indices)
     val targets = if (funSelected && funGroup != null) funGroup.targets
         else groups.getOrNull(selectedGroup)?.targets ?: stageDetail?.targets.orEmpty()
-    val orderedTargets = remember(targets, orderIndex) {
-        orderRatingTargets(targets.distinctBy { it.outBizType to it.outBizNo }, StageTargetOrder.entries[orderIndex])
+    // Score/count updates refresh card values without moving cards under the reader's finger.
+    val targetOrder = remember(match.uniqueKey, selectedStageIndex, selectedStage?.outBizType, selectedStage?.outBizNo,
+        funSelected, selectedGroup, orderIndex, targets.isEmpty()) {
+        orderRatingTargets(targets, StageTargetOrder.entries[orderIndex])
+            .map { it.outBizType to it.outBizNo }.distinct()
+    }
+    val orderedTargets = remember(targets, targetOrder) {
+        val byKey = targets.associateBy { it.outBizType to it.outBizNo }
+        targetOrder.mapNotNull(byKey::get)
     }
     LaunchedEffect(match.uniqueKey) {
         detail.bind(match)
@@ -108,7 +115,7 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
                                         DetailOrderSelector(orderIndex) { orderIndex = it }
                                     }
                                     if (targets.isEmpty()) item { DetailNotice("这个分组暂时没有评分对象") }
-                                    itemsIndexed(orderedTargets, key = { _, target -> "target-${target.outBizType.length}:${target.outBizType}${target.outBizNo}" }) { _, target ->
+                                    itemsIndexed(orderedTargets, key = { _, target -> "target-${target.outBizType.length}:${target.outBizType}${target.outBizNo}" }, contentType = { _, _ -> "player" }) { _, target ->
                                         MatchRatingPlayerCard(target) { viewModel.openComments(target) }
                                     }
                                 }
@@ -129,7 +136,7 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
                         if (state.value.teams.isEmpty() || state.value.teams.all { it.players.isEmpty() }) {
                             item { DetailNotice("这场比赛暂时没有技术统计") }
                         } else {
-                            itemsIndexed(state.value.teams, key = { index, _ -> "stats-$index-${detail.selectedMapId}" }) { _, team ->
+                            itemsIndexed(state.value.teams, key = { index, _ -> "stats-$index-${detail.selectedMapId}" }, contentType = { _, _ -> "stats" }) { _, team ->
                                 MatchStatsTable(team)
                             }
                         }

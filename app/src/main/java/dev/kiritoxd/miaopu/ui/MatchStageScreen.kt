@@ -135,8 +135,13 @@ private fun StageRatingContent(
     val currentOrderIndex = selectedOrderIndex.coerceIn(0, StageTargetOrder.entries.lastIndex)
     val selectedTab = tabs[currentTabIndex]
     val selectedOrder = StageTargetOrder.entries[currentOrderIndex]
-    val visibleTargets = remember(selectedTab, selectedOrder) {
-        orderRatingTargets(selectedTab.targets, selectedOrder)
+    val targetOrder = remember(match.uniqueKey, stage.outBizType, stage.outBizNo, currentTabIndex,
+        selectedOrder, selectedTab.targets.isEmpty()) {
+        orderRatingTargets(selectedTab.targets, selectedOrder).map { it.outBizType to it.outBizNo }.distinct()
+    }
+    val visibleTargets = remember(selectedTab.targets, targetOrder) {
+        val byKey = selectedTab.targets.associateBy { it.outBizType to it.outBizNo }
+        targetOrder.mapNotNull(byKey::get)
     }
 
     val restoredViewport = savedViewport?.coerceFor(

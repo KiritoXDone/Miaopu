@@ -28,6 +28,9 @@ internal fun CommentRepliesSheet(viewModel: MiaopuViewModel, target: RatingTarge
     val key = "sheet:${parent?.id}"
     val entry = viewModel.commentReplies.entry(key)
     val page = (entry?.state as? LoadState.Ready)?.value
+    val rows = remember(parent, page?.comments) {
+        if (parent == null || page == null) emptyList() else commentThreadRows(parent, page.comments)
+    }
     var selectedReply by remember(parent?.id, initiallyReply) { mutableStateOf<HupuComment?>(parent.takeIf { initiallyReply }) }
     val recipient = selectedReply ?: parent
     val actions = viewModel.commentActions
@@ -49,8 +52,7 @@ internal fun CommentRepliesSheet(viewModel: MiaopuViewModel, target: RatingTarge
                     null, LoadState.Loading -> item { DetailNotice("正在加载回复", loading = true) }
                     is LoadState.Failed -> item { DetailNotice(state.message, onRetry = { viewModel.commentReplies.retry(target, key) }) }
                     is LoadState.Ready -> {
-                        val rows = commentThreadRows(parent, state.value.comments)
-                        itemsIndexed(rows, key = { index, row -> "reply-$index-${row.comment.id}" }) { _, row ->
+                        itemsIndexed(rows, key = { _, row -> "reply-${row.comment.id}" }) { _, row ->
                             ReplyThreadCard(row, parent, actions, selectedReply?.id == row.comment.id,
                                 onLike = { like(row.comment) }, onReply = { selectedReply = row.comment })
                         }

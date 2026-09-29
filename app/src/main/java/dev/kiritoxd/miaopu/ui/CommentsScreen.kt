@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.kiritoxd.miaopu.data.HupuComment
 import dev.kiritoxd.miaopu.data.RatingTarget
+import dev.kiritoxd.miaopu.data.listKey
 import dev.kiritoxd.miaopu.data.mergeCommentsByHeat
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -56,7 +57,7 @@ fun CommentsScreen(viewModel: MiaopuViewModel, target: RatingTarget) {
                 val page = state.value
                 val comments = remember(page, order) {
                     if (order == 0) mergeCommentsByHeat(page.hottestComments, page.comments, page.hottestComments.map { it.id })
-                    else page.comments.sortedByDescending { it.publishTime ?: Long.MIN_VALUE }
+                    else page.comments.distinctBy { it.listKey }.sortedByDescending { it.publishTime ?: Long.MIN_VALUE }
                 }
                 LaunchedEffect(target.outBizType, target.outBizNo, page.comments.size, page.nextPublishTime, page.hasMore, viewModel.commentPaginationError) {
                     if (!page.hasMore || page.nextPublishTime == null || viewModel.commentPaginationError != null) return@LaunchedEffect
@@ -80,7 +81,7 @@ fun CommentsScreen(viewModel: MiaopuViewModel, target: RatingTarget) {
                         }
                     }
                     if (comments.isEmpty()) item { DetailNotice("还没有评论，来说说你的看法") }
-                    itemsIndexed(comments, key = { index, comment -> "comment-$index-${comment.id}" }) { _, comment ->
+                    itemsIndexed(comments, key = { _, comment -> "comment-${comment.listKey}" }) { _, comment ->
                         PlayerCommentCard(comment, viewModel.commentActions,
                             onLike = { if (viewModel.isLoggedIn) viewModel.commentActions.toggleLike(comment) else viewModel.openLogin() },
                             onReply = { openReplies(comment); replyImmediately = true },

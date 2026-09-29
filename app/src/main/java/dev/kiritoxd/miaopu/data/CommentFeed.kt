@@ -1,5 +1,8 @@
 package dev.kiritoxd.miaopu.data
 
+internal val HupuComment.listKey: String
+    get() = id.ifBlank { "${subjectId}:${author}:${content}" }
+
 /** Keeps the official hottest order, then appends paginated comments without visible reordering. */
 fun mergeCommentsByHeat(
     existing: List<HupuComment>,
@@ -8,7 +11,7 @@ fun mergeCommentsByHeat(
 ): List<HupuComment> {
     val unique = linkedMapOf<String, HupuComment>()
     (existing + incoming).forEach { comment ->
-        val key = comment.id.ifBlank { "${comment.subjectId}:${comment.author}:${comment.content}" }
+        val key = comment.listKey
         unique.putIfAbsent(key, comment)
     }
     val hottest = officialHotOrder.mapNotNull { id -> unique.remove(id) }

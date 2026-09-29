@@ -9,7 +9,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.kiritoxd.miaopu.data.MatchSummary
-import dev.kiritoxd.miaopu.data.RatingTarget
 import top.yukonga.miuix.kmp.basic.*
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -28,6 +27,18 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
     val funGroup = (detail.stage as? LoadState.Ready)?.value?.groups?.firstOrNull { it.name == "趣评" && it.targets.isNotEmpty() }
     var groupIndex by rememberSaveable(match.uniqueKey, selectedStage?.outBizNo, stageIndex) { mutableIntStateOf(0) }
     var orderIndex by rememberSaveable(match.uniqueKey) { mutableIntStateOf(0) }
+    val stageDetail = (detail.stage as? LoadState.Ready)?.value
+    val groups = remember(stageDetail, match.teams) {
+        stageDetail?.groups.orEmpty().filter { it.name != "趣评" && it.targets.isNotEmpty() }
+            .sortedBy { group -> match.teams.indexOfFirst { it.name == group.name }.takeIf { it >= 0 } ?: Int.MAX_VALUE }
+    }
+    val groupNames = remember(groups) { groups.map { it.name } }
+    val selectedGroup = if (groups.isEmpty()) 0 else groupIndex.coerceIn(groups.indices)
+    val targets = if (funSelected && funGroup != null) funGroup.targets
+        else groups.getOrNull(selectedGroup)?.targets ?: stageDetail?.targets.orEmpty()
+    val orderedTargets = remember(targets, orderIndex) {
+        orderRatingTargets(targets.distinctBy { it.outBizType to it.outBizNo }, StageTargetOrder.entries[orderIndex])
+    }
     LaunchedEffect(match.uniqueKey) {
         detail.bind(match)
         detail.ensureStats()
@@ -90,21 +101,14 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
                                     })
                                 }
                                 is LoadState.Ready -> {
-                                    val groups = stageState.value.groups.filter { it.name != "趣评" && it.targets.isNotEmpty() }
-                                        .sortedBy { group -> match.teams.indexOfFirst { it.name == group.name }.takeIf { it >= 0 } ?: Int.MAX_VALUE }
-                                    val groupNames = groups.map { it.name }
-                                    val selectedGroup = if (groups.isEmpty()) 0 else groupIndex.coerceIn(groupNames.indices)
-                                    val targets: List<RatingTarget> = if (funSelected && funGroup != null) funGroup.targets
-                                        else groups.getOrNull(selectedGroup)?.targets ?: stageState.value.targets
                                     if (groups.isNotEmpty() && !funSelected) item(key = "teams") {
                                         DetailTabs(groupNames, selectedGroup, style = DetailTabStyle.TEAM, logos = groups.map { it.logoUrl }) { groupIndex = it }
                                     }
                                     item(key = "order") {
                                         DetailOrderSelector(orderIndex) { orderIndex = it }
                                     }
-                                    val orderedTargets = orderRatingTargets(targets, StageTargetOrder.entries[orderIndex])
                                     if (targets.isEmpty()) item { DetailNotice("这个分组暂时没有评分对象") }
-                                    itemsIndexed(orderedTargets, key = { index, target -> "target-$index-${target.outBizNo}" }) { _, target ->
+                                    itemsIndexed(orderedTargets, key = { _, target -> "target-${target.outBizType.length}:${target.outBizType}${target.outBizNo}" }) { _, target ->
                                         MatchRatingPlayerCard(target) { viewModel.openComments(target) }
                                     }
                                 }

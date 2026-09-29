@@ -15,6 +15,8 @@ import android.view.View
 import android.widget.RemoteViews
 import dev.kiritoxd.miaopu.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -22,6 +24,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 internal object WidgetRenderer {
+    private val renderMutex = Mutex()
     fun ids(context: Context): List<Pair<Int, Boolean>> {
         val manager = AppWidgetManager.getInstance(context)
         return listOf(MatchWidgetProvider::class.java to false, ScheduleWidgetProvider::class.java to true)
@@ -31,16 +34,18 @@ internal object WidgetRenderer {
     }
 
     suspend fun renderAll(context: Context, refreshing: Boolean = false) = withContext(Dispatchers.IO) {
-        val now = System.currentTimeMillis()
-        val state = WidgetScheduleStore(context).state(now)
-        val manager = AppWidgetManager.getInstance(context)
-        ids(context).forEach { (id, wide) ->
-            val options = manager.getAppWidgetOptions(id)
-            val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 160)
-            val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, if (wide) 340 else 170)
-            val largeFont = context.resources.configuration.fontScale > 1.3f
-            val views = create(context, id, wide, state, now, height, largeFont, refreshing, width)
-            manager.updateAppWidget(id, views)
+        renderMutex.withLock {
+            val now = System.currentTimeMillis()
+            val state = WidgetScheduleStore(context).state(now)
+            val manager = AppWidgetManager.getInstance(context)
+            ids(context).forEach { (id, wide) ->
+                val options = manager.getAppWidgetOptions(id)
+                val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 160)
+                val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, if (wide) 340 else 170)
+                val largeFont = context.resources.configuration.fontScale > 1.3f
+                val views = create(context, id, wide, state, now, height, largeFont, refreshing, width)
+                manager.updateAppWidget(id, views)
+            }
         }
     }
 

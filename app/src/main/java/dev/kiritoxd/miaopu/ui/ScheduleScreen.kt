@@ -1,5 +1,6 @@
 package dev.kiritoxd.miaopu.ui
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -71,6 +72,8 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
+private class MainPageRequest(val section: MainSection)
+
 @Composable
 fun ScheduleScreen(viewModel: MiaopuViewModel) {
     val sections = MainSection.entries
@@ -79,22 +82,46 @@ fun ScheduleScreen(viewModel: MiaopuViewModel) {
         initialPage = viewModel.selectedMainSection.ordinal,
         pageCount = { sections.size },
     )
-    val visibleSection = sections[pagerState.currentPage]
+    var pageRequest by remember { mutableStateOf<MainPageRequest?>(null) }
+    val selectSection: (MainSection) -> Unit = { section ->
+        if (pageRequest?.section != section &&
+            (pagerState.currentPage != section.ordinal || pagerState.isScrollInProgress)) {
+            pageRequest = MainPageRequest(section)
+        }
+        viewModel.selectMainSection(section)
+    }
+    val visibleSection = pageRequest?.section ?: sections[pagerState.currentPage]
     val backState = rememberNavigationEventState(NavigationEventInfo.None)
     NavigationBackHandler(
         state = backState,
         isBackEnabled = viewModel.selectedMainSection != MainSection.HOME,
-        onBackCompleted = { viewModel.selectMainSection(MainSection.HOME) },
+        onBackCompleted = { selectSection(MainSection.HOME) },
     )
-    LaunchedEffect(viewModel.selectedMainSection, pagerState) {
-        val targetPage = viewModel.selectedMainSection.ordinal
-        if (pagerState.settledPage != targetPage) {
-            pagerState.animateScrollToPage(targetPage)
+    // Widget/deep-link navigation can change the selection without a bar click.
+    LaunchedEffect(viewModel.selectedMainSection) {
+        val section = viewModel.selectedMainSection
+        if (pageRequest?.section != section &&
+            (pageRequest != null || pagerState.currentPage != section.ordinal)) {
+            pageRequest = MainPageRequest(section)
+        }
+    }
+    LaunchedEffect(pageRequest, pagerState) {
+        val request = pageRequest ?: return@LaunchedEffect
+        try {
+            pagerState.animateScrollToPage(
+                request.section.ordinal,
+                animationSpec = tween(TabMotionDurationMillis, easing = TabMotionEasing),
+            )
+        } finally {
+            if (pageRequest === request) pageRequest = null
         }
     }
     LaunchedEffect(pagerState, viewModel) {
-        snapshotFlow { pagerState.settledPage }
+        snapshotFlow {
+            if (pageRequest == null && !pagerState.isScrollInProgress) pagerState.settledPage else null
+        }
             .distinctUntilChanged()
+            .filterNotNull()
             .collect { page ->
                 val section = sections[page]
                 if (section != viewModel.selectedMainSection) viewModel.selectMainSection(section)
@@ -105,7 +132,7 @@ fun ScheduleScreen(viewModel: MiaopuViewModel) {
         bottomBar = {
             MainNavigationBar(
                 selected = visibleSection,
-                onSelect = viewModel::selectMainSection,
+                onSelect = selectSection,
             )
         },
     ) { innerPadding ->
@@ -138,6 +165,8 @@ private fun MainSectionContent(
     }
 }
 
+private class HomeScheduleMerge(val sources: List<Schedule>, val schedule: Schedule)
+
 @Composable
 private fun HomeSectionContent(
     viewModel: MiaopuViewModel,
@@ -148,16 +177,28 @@ private fun HomeSectionContent(
     val loading = states.any { it is LoadState.Loading }
     val readySchedules = states.mapNotNull { state -> (state as? LoadState.Ready)?.value }
     val failedStates = states.filterIsInstance<LoadState.Failed>()
-    val mergedSchedule = remember(readySchedules) { mergeSchedules(readySchedules) }
+    // Canonicalize equal snapshots so an equal refresh cannot invalidate a completed merge.
+    val mergeSources = remember(readySchedules) { readySchedules }
     var displayedSchedule by remember(subscriptions) { mutableStateOf<Schedule?>(null) }
+    val mergeResult by produceState<HomeScheduleMerge?>(null, subscriptions, mergeSources, loading) {
+        if (loading) return@produceState
+        val displayed = displayedSchedule
+        val merged = withContext(Dispatchers.Default) {
+            mergeSchedules(mergeSources).let { if (displayed != null && it == displayed) displayed else it }
+        }
+        value = HomeScheduleMerge(mergeSources, merged)
+    }
+    val mergedSchedule = mergeResult?.takeIf { result ->
+        !loading && result.sources === mergeSources
+    }?.schedule
     // Once reading starts, a network completion must not replace the visible timeline.
     LaunchedEffect(loading, mergedSchedule, subscriptions) {
-        if (!loading && displayedSchedule == null && readySchedules.isNotEmpty()) {
+        if (mergedSchedule != null && displayedSchedule == null && readySchedules.isNotEmpty()) {
             displayedSchedule = mergedSchedule
         }
     }
-    val pendingUpdate = !loading && readySchedules.isNotEmpty() &&
-        displayedSchedule != null && displayedSchedule != mergedSchedule
+    val pendingUpdate = mergedSchedule != null && readySchedules.isNotEmpty() &&
+        displayedSchedule != null && displayedSchedule !== mergedSchedule
     val bottomPadding = innerPadding.calculateBottomPadding()
 
     Column(
@@ -169,7 +210,7 @@ private fun HomeSectionContent(
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             when {
                 displayedSchedule != null -> HomeContent(viewModel, checkNotNull(displayedSchedule), bottomPadding)
-                states.any { it is LoadState.Loading } -> LoadingPane(
+                (loading || (mergedSchedule == null && readySchedules.isNotEmpty())) -> LoadingPane(
                     label = "正在合并已订阅赛事",
                     modifier = Modifier.fillMaxSize().padding(bottom = bottomPadding),
                 )
@@ -179,7 +220,8 @@ private fun HomeSectionContent(
                     onRetry = viewModel::refreshHomeSchedules,
                     modifier = Modifier.fillMaxSize().padding(bottom = bottomPadding),
                 )
-                else -> HomeContent(viewModel, mergedSchedule, bottomPadding)
+                mergedSchedule != null -> HomeContent(viewModel, mergedSchedule, bottomPadding)
+                else -> LoadingPane("正在合并已订阅赛事", Modifier.fillMaxSize())
             }
             if (pendingUpdate) {
                 TextButton("赛程已更新，点击查看", onClick = { displayedSchedule = mergedSchedule },
@@ -188,6 +230,8 @@ private fun HomeSectionContent(
         }
     }
 }
+
+private class EsportPageRequest(val esport: Esport)
 
 @Composable
 private fun EventsSectionContent(
@@ -202,20 +246,42 @@ private fun EventsSectionContent(
         initialPage = selectedEsportIndex,
         pageCount = { subscriptions.size },
     )
-    val visibleEsport = subscriptions.getOrNull(pagerState.currentPage)
+    var pageRequest by remember { mutableStateOf<EsportPageRequest?>(null) }
+    val visibleEsport = pageRequest?.esport ?: subscriptions.getOrNull(pagerState.currentPage)
         ?: subscriptions[selectedEsportIndex]
     var searchExpanded by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
 
-    LaunchedEffect(viewModel.selectedEsport, subscriptions, pagerState) {
-        val targetPage = subscriptions.indexOf(viewModel.selectedEsport).coerceAtLeast(0)
-        if (pagerState.settledPage != targetPage) pagerState.animateScrollToPage(targetPage)
+    LaunchedEffect(viewModel.selectedEsport, subscriptions) {
+        val esport = viewModel.selectedEsport
+        if (pageRequest?.esport != esport &&
+            (pageRequest != null || subscriptions.getOrNull(pagerState.currentPage) != esport)) {
+            pageRequest = EsportPageRequest(esport)
+        }
+    }
+    LaunchedEffect(pageRequest, subscriptions, pagerState) {
+        val request = pageRequest ?: return@LaunchedEffect
+        try {
+            val targetPage = subscriptions.indexOf(request.esport)
+            if (targetPage >= 0) {
+                pagerState.animateScrollToPage(
+                    targetPage,
+                    animationSpec = tween(TabMotionDurationMillis, easing = TabMotionEasing),
+                )
+            }
+        } finally {
+            // An interrupted animation must not clear a newer tap's destination.
+            if (pageRequest === request) pageRequest = null
+        }
     }
     LaunchedEffect(pagerState, subscriptions, viewModel) {
-        snapshotFlow { pagerState.settledPage }
-            .map(subscriptions::getOrNull)
-            .filterNotNull()
+        snapshotFlow {
+            if (pageRequest == null && !pagerState.isScrollInProgress) {
+                subscriptions.getOrNull(pagerState.settledPage)
+            } else null
+        }
             .distinctUntilChanged()
+            .filterNotNull()
             .collect { esport ->
                 if (esport != viewModel.selectedEsport) viewModel.selectEsport(esport)
             }
@@ -229,6 +295,10 @@ private fun EventsSectionContent(
         EventsHeader(
             viewModel = viewModel,
             esport = visibleEsport,
+            onEsportSelect = { esport ->
+                pageRequest = EsportPageRequest(esport)
+                viewModel.selectEsport(esport)
+            },
             searchExpanded = searchExpanded,
             searchQuery = searchQuery,
             onSearchQueryChange = { searchQuery = it },
@@ -505,6 +575,7 @@ private fun HomeHeader(viewModel: MiaopuViewModel) {
 private fun EventsHeader(
     viewModel: MiaopuViewModel,
     esport: Esport,
+    onEsportSelect: (Esport) -> Unit,
     searchExpanded: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
@@ -547,19 +618,22 @@ private fun EventsHeader(
                 onExpandedChange = onSearchExpandedChange,
             )
         } else {
-            EsportSelector(viewModel, esport)
+            EsportSelector(viewModel.subscribedEsports, esport, onEsportSelect)
         }
     }
 }
 
 @Composable
-private fun EsportSelector(viewModel: MiaopuViewModel, selectedEsport: Esport) {
-    val subscriptions = viewModel.subscribedEsports
+private fun EsportSelector(
+    subscriptions: List<Esport>,
+    selectedEsport: Esport,
+    onSelect: (Esport) -> Unit,
+) {
     DetailTabs(
         labels = subscriptions.map { it.shortTitle },
         selected = subscriptions.indexOf(selectedEsport).coerceAtLeast(0),
         style = DetailTabStyle.PAGE,
-        onSelect = { viewModel.selectEsport(subscriptions[it]) },
+        onSelect = { onSelect(subscriptions[it]) },
     )
 }
 

@@ -32,8 +32,8 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 // Nagram FilterTabsView: selection position and text colors share a 320 ms ease-out curve.
-private const val TabMotionDurationMillis = 320
-private val TabMotionEasing = CubicBezierEasing(0.23f, 1f, 0.32f, 1f)
+internal const val TabMotionDurationMillis = 320
+internal val TabMotionEasing = CubicBezierEasing(0.23f, 1f, 0.32f, 1f)
 
 internal enum class DetailTabStyle { PAGE, MAP, TEAM }
 

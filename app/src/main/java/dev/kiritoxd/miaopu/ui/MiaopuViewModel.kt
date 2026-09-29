@@ -324,7 +324,7 @@ class MiaopuViewModel(
                         next.copy(
                             comments = merged,
                             totalCount = maxOf(current.totalCount, next.totalCount),
-                            hottestComments = current.hottestComments,
+                            hottestComments = (commentState as? LoadState.Ready)?.value?.hottestComments ?: current.hottestComments,
                         ),
                     )
                 } else {
@@ -555,19 +555,21 @@ class MiaopuViewModel(
         commentJob = viewModelScope.launch {
             val hottestDeferred = async { adapter.getHottestComments(target) }
             val pageResult = adapter.getComments(target)
+            if ((screen as? AppScreen.Comments)?.target?.key != targetKey) {
+                hottestDeferred.cancel()
+                return@launch
+            }
+            val page = pageResult.data
+            if (page == null) {
+                commentState = pageResult.toLoadState()
+                hottestDeferred.cancel()
+                return@launch
+            }
+            // Default ordering requires the official hottest list before publishing the feed.
+            // The player header is already visible while these concurrent requests complete.
             val hottestResult = hottestDeferred.await()
             if ((screen as? AppScreen.Comments)?.target?.key != targetKey) return@launch
-
-            val page = pageResult.data
-            commentState = if (page != null) {
-                LoadState.Ready(
-                    page.copy(
-                        hottestComments = hottestResult.data.orEmpty(),
-                    ),
-                )
-            } else {
-                pageResult.toLoadState()
-            }
+            commentState = LoadState.Ready(page.copy(hottestComments = hottestResult.data.orEmpty()))
         }
     }
 

@@ -43,7 +43,7 @@ internal fun CommentRepliesSheet(viewModel: MiaopuViewModel, target: RatingTarge
         if (parent != null) Column(Modifier.fillMaxWidth().imePadding()) {
             LazyColumn(Modifier.fillMaxWidth().weight(1f, fill = false).heightIn(max = 480.dp),
                 verticalArrangement = Arrangement.spacedBy(0.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
-                item(key = "parent") {
+                item(key = "parent", contentType = "parent") {
                     Box(Modifier.fillMaxWidth().clickable { selectedReply = parent }.padding(14.dp)) {
                         CommentRow(parent, actions = actions, onLike = { like(parent) }, onReply = { selectedReply = parent }, metadataAbove = true)
                     }
@@ -52,7 +52,7 @@ internal fun CommentRepliesSheet(viewModel: MiaopuViewModel, target: RatingTarge
                     null, LoadState.Loading -> item { DetailNotice("正在加载回复", loading = true) }
                     is LoadState.Failed -> item { DetailNotice(state.message, onRetry = { viewModel.commentReplies.retry(target, key) }) }
                     is LoadState.Ready -> {
-                        itemsIndexed(rows, key = { _, row -> "reply-${row.comment.id}" }) { _, row ->
+                        itemsIndexed(rows, key = { _, row -> "reply-${row.comment.id}" }, contentType = { _, _ -> "reply" }) { _, row ->
                             ReplyThreadCard(row, parent, actions, selectedReply?.id == row.comment.id,
                                 onLike = { like(row.comment) }, onReply = { selectedReply = row.comment })
                         }

@@ -17,6 +17,8 @@ import dev.kiritoxd.miaopu.data.HupuComment
 import dev.kiritoxd.miaopu.data.RatingTarget
 import dev.kiritoxd.miaopu.data.listKey
 import dev.kiritoxd.miaopu.data.mergeCommentsByHeat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import top.yukonga.miuix.kmp.basic.*
@@ -50,46 +52,60 @@ fun CommentsScreen(viewModel: MiaopuViewModel, target: RatingTarget) {
             IconButton(onClick = viewModel::goBack) { Icon(LucideIcons.ChevronLeft, "返回评分") }
         })
     }) { padding ->
-        when (val state = viewModel.commentState) {
-            LoadState.Loading -> LoadingPane("正在加载评论", Modifier.padding(padding))
-            is LoadState.Failed -> ErrorPane(state.message, state.retryable, viewModel::retry, Modifier.padding(padding))
-            is LoadState.Ready -> {
-                val page = state.value
-                val comments = remember(page, order) {
-                    if (order == 0) mergeCommentsByHeat(page.hottestComments, page.comments, page.hottestComments.map { it.id })
-                    else page.comments.distinctBy { it.listKey }.sortedByDescending { it.publishTime ?: Long.MIN_VALUE }
+        val state = viewModel.commentState
+        val page = (state as? LoadState.Ready)?.value
+        val comments by produceState<List<HupuComment>?>(null, page, order) {
+            val currentPage = page ?: run { value = null; return@produceState }
+            value = withContext(Dispatchers.Default) {
+                if (order == 0) mergeCommentsByHeat(currentPage.hottestComments, currentPage.comments, currentPage.hottestComments.map { it.id })
+                else currentPage.comments.distinctBy { it.listKey }.sortedByDescending { it.publishTime ?: Long.MIN_VALUE }
+            }
+        }
+        if (page != null && comments != null) {
+            LaunchedEffect(target.outBizType, target.outBizNo, page.comments.size, page.nextPublishTime, page.hasMore, viewModel.commentPaginationError) {
+                if (!page.hasMore || page.nextPublishTime == null || viewModel.commentPaginationError != null) return@LaunchedEffect
+                snapshotFlow {
+                    val layout = listState.layoutInfo
+                    layout.totalItemsCount > 0 && (layout.visibleItemsInfo.lastOrNull()?.index ?: -1) >= layout.totalItemsCount - 3
+                }.filter { it }.first()
+                viewModel.loadMoreComments(target)
+            }
+        }
+        LazyColumn(Modifier.fillMaxSize().padding(padding), state = listState,
+            contentPadding = PaddingValues(top = 4.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+            item(key = "player", contentType = "player") {
+                PlayerIdentityCard(currentTarget, viewModel.commentMatchLabel(), selectedScore,
+                    canSelectScore = viewModel.isLoggedIn && !viewModel.isPublishingComment,
+                    onScoreChange = { selectedScore = it; showCommentInput = true }, onLogin = { if (!viewModel.isLoggedIn) viewModel.openLogin() })
+            }
+            when (state) {
+                LoadState.Loading -> item(key = "loading", contentType = "notice") {
+                    DetailNotice("正在加载评论", loading = true)
                 }
-                LaunchedEffect(target.outBizType, target.outBizNo, page.comments.size, page.nextPublishTime, page.hasMore, viewModel.commentPaginationError) {
-                    if (!page.hasMore || page.nextPublishTime == null || viewModel.commentPaginationError != null) return@LaunchedEffect
-                    snapshotFlow {
-                        val layout = listState.layoutInfo
-                        layout.totalItemsCount > 0 && (layout.visibleItemsInfo.lastOrNull()?.index ?: -1) >= layout.totalItemsCount - 3
-                    }.filter { it }.first()
-                    viewModel.loadMoreComments(target)
+                is LoadState.Failed -> item(key = "error", contentType = "notice") {
+                    DetailNotice(state.message, onRetry = if (state.retryable) viewModel::retry else null)
                 }
-                LazyColumn(Modifier.fillMaxSize().padding(padding), state = listState,
-                    contentPadding = PaddingValues(top = 4.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                    item(key = "player") {
-                        PlayerIdentityCard(currentTarget, viewModel.commentMatchLabel(), selectedScore,
-                            canSelectScore = viewModel.isLoggedIn && !viewModel.isPublishingComment,
-                            onScoreChange = { selectedScore = it; showCommentInput = true }, onLogin = { if (!viewModel.isLoggedIn) viewModel.openLogin() })
-                    }
-                    item(key = "heading") {
+                is LoadState.Ready -> {
+                    item(key = "heading", contentType = "heading") {
                         Row(Modifier.fillMaxWidth().padding(start = 16.dp, top = 18.dp, bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text("全部评论 ${page.totalCount}", Modifier.weight(1f), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                            Text("全部评论 ${state.value.totalCount}", Modifier.weight(1f), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                             Box(Modifier.width(130.dp)) { DetailOrderSelector(order, labels = listOf("最热", "最新")) { order = it } }
                         }
                     }
-                    if (comments.isEmpty()) item { DetailNotice("还没有评论，来说说你的看法") }
-                    itemsIndexed(comments, key = { _, comment -> "comment-${comment.listKey}" }) { _, comment ->
+                    val visibleComments = comments
+                    if (visibleComments == null) item(key = "sorting", contentType = "notice") {
+                        DetailNotice("正在整理评论", loading = true)
+                    }
+                    else if (visibleComments.isEmpty()) item(key = "empty", contentType = "notice") { DetailNotice("还没有评论，来说说你的看法") }
+                    itemsIndexed(visibleComments.orEmpty(), key = { _, comment -> "comment-${comment.listKey}" }, contentType = { _, _ -> "comment" }) { _, comment ->
                         PlayerCommentCard(comment, viewModel.commentActions,
                             onLike = { if (viewModel.isLoggedIn) viewModel.commentActions.toggleLike(comment) else viewModel.openLogin() },
                             onReply = { openReplies(comment); replyImmediately = true },
                             onReplies = { openReplies(comment) })
                     }
-                    item(key = "pagination") {
+                    item(key = "pagination", contentType = "notice") {
                         if (viewModel.commentPaginationError != null) TextButton("重新加载评论", onClick = { viewModel.loadMoreComments(target) }, modifier = Modifier.padding(horizontal = 16.dp))
-                        else if (page.hasMore && page.nextPublishTime != null) Text(if (viewModel.isLoadingMoreComments) "正在加载…" else "上滑加载更多", Modifier.padding(16.dp), fontSize = 11.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                        else if (state.value.hasMore && state.value.nextPublishTime != null) Text(if (viewModel.isLoadingMoreComments) "正在加载…" else "上滑加载更多", Modifier.padding(16.dp), fontSize = 11.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
                     }
                 }
             }

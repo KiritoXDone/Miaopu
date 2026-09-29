@@ -50,10 +50,7 @@ import dev.kiritoxd.miaopu.data.focusMatchId
 import dev.kiritoxd.miaopu.data.focusInitialItemIndex
 import dev.kiritoxd.miaopu.data.homeWindowAround
 import dev.kiritoxd.miaopu.data.mergeSchedules
-import dev.kiritoxd.miaopu.data.searchSchedule
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -325,47 +322,6 @@ private fun EventsSectionContent(
 }
 
 @Composable
-private fun EventsPageContent(
-    viewModel: MiaopuViewModel,
-    esport: Esport,
-    innerPadding: PaddingValues,
-    searchQuery: String,
-) {
-    val bottomPadding = innerPadding.calculateBottomPadding()
-
-    when (val state = viewModel.scheduleStateFor(esport)) {
-        LoadState.Loading -> LoadingPane(
-            label = "正在同步${esport.title}赛程",
-            modifier = Modifier.fillMaxSize().padding(bottom = bottomPadding),
-        )
-        is LoadState.Failed -> ErrorPane(
-            message = state.message,
-            retryable = state.retryable,
-            onRetry = viewModel::retry,
-            modifier = Modifier.fillMaxSize().padding(bottom = bottomPadding),
-        )
-        is LoadState.Ready -> if (searchQuery.isBlank()) {
-            EventsContent(viewModel, state.value, esport, bottomPadding)
-        } else {
-            val result by produceState<Triple<Schedule, String, Schedule>?>(null, state.value, searchQuery) {
-                delay(120)
-                value = Triple(state.value, searchQuery, withContext(Dispatchers.Default) {
-                    state.value.searchSchedule(searchQuery) { ensureActive() }
-                })
-            }
-            val currentResult = result?.takeIf { it.first === state.value && it.second == searchQuery }
-            if (currentResult == null) LoadingPane("正在搜索赛程", Modifier.fillMaxSize().padding(bottom = bottomPadding))
-            else EventsScheduleSearchResults(
-                schedule = currentResult.third,
-                query = searchQuery,
-                bottomPadding = bottomPadding,
-                onMatchClick = viewModel::openMatch,
-            )
-        }
-    }
-}
-
-@Composable
 private fun MainNavigationBar(
     selected: MainSection,
     onSelect: (MainSection) -> Unit,
@@ -447,7 +403,7 @@ private fun HomeContent(
 }
 
 @Composable
-private fun EventsContent(
+internal fun EventsContent(
     viewModel: MiaopuViewModel,
     schedule: Schedule,
     esport: Esport,

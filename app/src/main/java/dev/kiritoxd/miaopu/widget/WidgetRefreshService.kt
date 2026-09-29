@@ -34,6 +34,7 @@ class WidgetRefreshService : JobService() {
         if (WidgetRenderer.ids(this).isEmpty()) return false
         val adapter = HupuAdapter(HupuCookieSession(this))
         refresh = scope.launch {
+            var clearedRefreshing = false
             try {
                 WidgetRenderer.renderAll(this@WidgetRefreshService, refreshing = true)
                 val subscriptions = EsportSubscriptionStore(this@WidgetRefreshService).subscriptions()
@@ -58,19 +59,21 @@ class WidgetRefreshService : JobService() {
                     }.awaitAll()
                 }
                 WidgetRenderer.renderAll(this@WidgetRefreshService)
+                clearedRefreshing = true
                 try {
-                    WidgetLogoStore(this@WidgetRefreshService).load(store.state(System.currentTimeMillis()).matches)
+                    if (WidgetLogoStore(this@WidgetRefreshService).load(store.state(System.currentTimeMillis()).matches)) {
+                        WidgetRenderer.renderAll(this@WidgetRefreshService)
+                    }
                 } catch (_: IOException) {
                     // Score data is still usable when a thumbnail cannot be stored.
                 }
-                WidgetRenderer.renderAll(this@WidgetRefreshService)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
                 android.util.Log.w("MiaopuWidget", "Widget refresh did not complete", error)
             } finally {
                 // Remove an in-progress label even if the system stopped this job.
-                withContext(NonCancellable + Dispatchers.IO) {
+                if (!clearedRefreshing) withContext(NonCancellable + Dispatchers.IO) {
                     WidgetRenderer.renderAll(this@WidgetRefreshService)
                 }
             }

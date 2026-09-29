@@ -25,7 +25,15 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
     val ratingListState = rememberLazyListState()
     val dataListState = rememberLazyListState()
     var page by rememberSaveable(match.uniqueKey) { mutableIntStateOf(0) }
-    val activePage = if (detail.hasStatistics) page else 0
+    var header by remember(match.uniqueKey) { mutableStateOf<MatchHeaderSnapshot?>(null) }
+    val candidateHeader = remember(detail.summary, detail.statistics, detail.hasStatistics) {
+        matchHeaderSnapshot(detail.summary, detail.statistics, detail.hasStatistics)
+    }
+    val bodyReady = viewModel.ratingState !is LoadState.Loading &&
+        ((viewModel.ratingState as? LoadState.Ready)?.value?.stages.isNullOrEmpty() || detail.stage !is LoadState.Loading)
+    val visibleHeader = header ?: candidateHeader?.takeIf { bodyReady }
+    SideEffect { if (header == null && visibleHeader != null) header = visibleHeader }
+    val activePage = if (visibleHeader?.hasStatistics == true) page else 0
     var stageIndex by rememberSaveable(match.uniqueKey) { mutableIntStateOf(0) }
     val stages = (viewModel.ratingState as? LoadState.Ready)?.value?.stages.orEmpty()
     val selectedStageIndex = if (stages.isEmpty()) 0 else stageIndex.coerceIn(stages.indices)
@@ -95,11 +103,15 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item(key = "hero") { MatchHero(match) }
-            if (detail.hasStatistics) item(key = "pages") {
+            if (visibleHeader == null) {
+                item(key = "initial-loading") { DetailNotice("正在加载比赛详情", loading = true) }
+                return@LazyColumn
+            }
+            if (visibleHeader.hasStatistics) item(key = "pages") {
                 DetailTabs(listOf("评分", "数据"), activePage, style = DetailTabStyle.PAGE) { page = it }
             }
             if (activePage == 0) {
-                val summary = (detail.summary as? LoadState.Ready)?.value
+                val summary = visibleHeader.summary
                 if (summary?.hasScores == true) item(key = "summary") { AllMatchScoreCard(summary) }
                 when (val state = viewModel.ratingState) {
                     LoadState.Loading -> item { DetailNotice("正在加载单局评分", loading = true) }

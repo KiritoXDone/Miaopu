@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.sp
 import dev.kiritoxd.miaopu.data.HupuComment
 import dev.kiritoxd.miaopu.data.RatingTarget
 import dev.kiritoxd.miaopu.data.listKey
-import dev.kiritoxd.miaopu.data.mergeCommentsByHeat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.filter
@@ -54,14 +53,18 @@ fun CommentsScreen(viewModel: MiaopuViewModel, target: RatingTarget) {
     }) { padding ->
         val state = viewModel.commentState
         val page = (state as? LoadState.Ready)?.value
-        val comments by produceState<List<HupuComment>?>(null, page, order) {
-            val currentPage = page ?: run { value = null; return@produceState }
-            value = withContext(Dispatchers.Default) {
-                if (order == 0) mergeCommentsByHeat(currentPage.hottestComments, currentPage.comments, currentPage.hottestComments.map { it.id })
-                else currentPage.comments.distinctBy { it.listKey }.sortedByDescending { it.publishTime ?: Long.MIN_VALUE }
+        val targetKey = target.outBizType to target.outBizNo
+        val preparedState = key(targetKey) {
+            produceState<PreparedCommentFeed?>(null, page, order) {
+                val currentPage = page ?: run { value = null; return@produceState }
+                value = withContext(Dispatchers.Default) { prepareCommentFeed(currentPage, order) }
             }
         }
-        if (page != null && comments != null) {
+        val prepared = preparedState.value
+        val comments = prepared?.comments
+        val visibleOrder = prepared?.order ?: order
+        val preparing = prepared == null || prepared.order != order || prepared.page != page
+        if (page != null && comments != null && !preparing) {
             LaunchedEffect(target.outBizType, target.outBizNo, page.comments.size, page.nextPublishTime, page.hasMore, viewModel.commentPaginationError) {
                 if (!page.hasMore || page.nextPublishTime == null || viewModel.commentPaginationError != null) return@LaunchedEffect
                 snapshotFlow {
@@ -88,8 +91,8 @@ fun CommentsScreen(viewModel: MiaopuViewModel, target: RatingTarget) {
                 is LoadState.Ready -> {
                     item(key = "heading", contentType = "heading") {
                         Row(Modifier.fillMaxWidth().padding(start = 16.dp, top = 18.dp, bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text("全部评论 ${state.value.totalCount}", Modifier.weight(1f), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-                            Box(Modifier.width(130.dp)) { DetailOrderSelector(order, labels = listOf("最热", "最新")) { order = it } }
+                            Text(if (preparing) "正在整理评论…" else "全部评论 ${state.value.totalCount}", Modifier.weight(1f), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                            Box(Modifier.width(130.dp)) { DetailOrderSelector(visibleOrder, labels = listOf("最热", "最新")) { order = it } }
                         }
                     }
                     val visibleComments = comments

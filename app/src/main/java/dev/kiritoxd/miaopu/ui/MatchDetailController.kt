@@ -176,7 +176,8 @@ internal class MatchDetailController(
     }
     private fun applyStats(data: MatchStats) {
         maps = data.maps
-        hasStatistics = data.teams.any { team ->
+        // Availability belongs to the match; an empty map must not remove the active data tab.
+        hasStatistics = hasStatistics || data.teams.any { team ->
             team.players.any { row -> row.drop(1).any { it.text.isNotBlank() && it.text != "—" } }
         }
     }

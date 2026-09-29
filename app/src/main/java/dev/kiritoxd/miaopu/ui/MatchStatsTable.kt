@@ -1,5 +1,6 @@
 package dev.kiritoxd.miaopu.ui
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -22,9 +23,9 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-internal fun MatchStatsTable(team: StatsTeam) {
-    val scroll = rememberScrollState()
+internal fun MatchStatsTable(team: StatsTeam, scroll: ScrollState = rememberScrollState()) {
     val rowHeight = with(LocalDensity.current) { 30.sp.toDp() }.coerceAtLeast(30.dp)
+    val headerHeight = with(LocalDensity.current) { 34.sp.toDp() }.coerceAtLeast(34.dp)
     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), cornerRadius = 18.dp,
         insideMargin = PaddingValues(0.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically,
@@ -36,7 +37,7 @@ internal fun MatchStatsTable(team: StatsTeam) {
         Row(Modifier.fillMaxWidth()) {
             // Only the stats column scrolls, keeping player names visible at every offset.
             Column(Modifier.width(136.dp)) {
-                Box(Modifier.fillMaxWidth().height(26.dp).background(MiuixTheme.colorScheme.onSurface.copy(alpha = 0.035f)), contentAlignment = Alignment.CenterStart) {
+                Box(Modifier.fillMaxWidth().height(headerHeight).background(MiuixTheme.colorScheme.onSurface.copy(alpha = 0.035f)), contentAlignment = Alignment.CenterStart) {
                     Text("选手", modifier = Modifier.padding(start = 12.dp), fontSize = 12.sp,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
                 }
@@ -46,12 +47,12 @@ internal fun MatchStatsTable(team: StatsTeam) {
                         val player = cells.firstOrNull()
                         if (player?.imageUrl != null) AsyncImage(player.imageUrl, contentDescription = null, modifier = Modifier.size(24.dp).clip(CircleShape))
                         Text(player?.text ?: "—", maxLines = 2, overflow = TextOverflow.Ellipsis,
-                            fontSize = 12.sp, fontWeight = FontWeight.Normal)
+                            fontSize = 12.sp, lineHeight = 14.sp, fontWeight = FontWeight.Normal)
                     }
                 }
             }
             Column(Modifier.weight(1f).horizontalScroll(scroll)) {
-                Row(Modifier.height(26.dp).background(MiuixTheme.colorScheme.onSurface.copy(alpha = 0.035f))) {
+                Row(Modifier.height(headerHeight).background(MiuixTheme.colorScheme.onSurface.copy(alpha = 0.035f))) {
                     team.columns.drop(1).forEach { column -> StatText(column, header = true) }
                 }
                 team.players.forEachIndexed { index, cells ->
@@ -68,7 +69,7 @@ internal fun MatchStatsTable(team: StatsTeam) {
 @Composable
 private fun StatText(value: String, header: Boolean) {
     Box(Modifier.width(68.dp).fillMaxHeight().padding(horizontal = 4.dp), contentAlignment = Alignment.Center) {
-        Text(value, textAlign = TextAlign.Center, fontSize = 12.sp,
+        Text(value, textAlign = TextAlign.Center, fontSize = 12.sp, lineHeight = 14.sp,
             fontWeight = if (header) FontWeight.Normal else FontWeight.Medium,
             color = if (header) MiuixTheme.colorScheme.onSurfaceVariantSummary else MiuixTheme.colorScheme.onSurface,
             maxLines = 2, overflow = TextOverflow.Ellipsis)

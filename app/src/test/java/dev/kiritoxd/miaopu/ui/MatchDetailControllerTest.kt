@@ -216,6 +216,29 @@ class MatchDetailControllerTest {
         } finally { scope.cancel() }
     }
 
+    @Test fun emptyMapDoesNotRemovePreviouslyAvailableDataTab() = runBlocking {
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        try {
+            val controller = controller(scope, source(stats = { _, id ->
+                AdapterResult.success("fixture", MatchStats(emptyList(), id,
+                    if (id == "1") listOf(StatsTeam("team", null, null,
+                        listOf("选手", "K/D"),
+                        listOf(listOf(StatsCell("player", null), StatsCell("2/1", null)))))
+                    else emptyList()))
+            }))
+            controller.bind(match("cs"))
+            controller.loadStats("1")
+            assertTrue(controller.hasStatistics)
+            controller.loadStats("2")
+            assertEquals("2", controller.selectedMapId)
+            assertTrue((controller.statistics as LoadState.Ready).value.teams.isEmpty())
+            assertTrue(controller.hasStatistics)
+            controller.bind(match("other"))
+            controller.loadStats("2")
+            assertFalse(controller.hasStatistics)
+        } finally { scope.cancel() }
+    }
+
     private fun controller(scope: CoroutineScope, source: MatchDetailSource) = MatchDetailController(
         scope, { _, _ -> AdapterResult.success("fixture", StageRatingDetail("", null, null, emptyList(), emptyList())) }, source,
     )

@@ -4,6 +4,18 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class CommentThreadTest {
+    @Test fun cancelledPreparationStopsBeforeReturningRows() {
+        var checks = 0
+        try {
+            commentThreadRows(comment("root"), List(100) { comment("$it", "root") }) {
+                if (++checks == 10) throw java.util.concurrent.CancellationException()
+            }
+            fail("Expected cancellation")
+        } catch (_: java.util.concurrent.CancellationException) {
+            assertEquals(10, checks)
+        }
+    }
+
     private fun comment(id: String, parent: String? = null) = HupuComment(id, "subject", id, null, id, "", null, 0, 0, parentCommentId = parent)
     @Test fun buildsDepthFirstBranchesWithActualRecipients() {
         val root = comment("root")

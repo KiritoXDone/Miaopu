@@ -8,6 +8,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.semantics.Role
+import dev.kiritoxd.miaopu.data.CommentThreadRow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.ensureActive
 import dev.kiritoxd.miaopu.data.commentThreadRows
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
@@ -23,14 +27,31 @@ import top.yukonga.miuix.kmp.basic.*
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
+private class PreparedReplies(
+    val rootId: String,
+    val comments: List<HupuComment>,
+    val rows: List<CommentThreadRow>,
+)
+
 @Composable
 internal fun CommentRepliesSheet(viewModel: MiaopuViewModel, target: RatingTarget, parent: HupuComment?, initiallyReply: Boolean = false, onDismiss: () -> Unit) {
     val key = "sheet:${parent?.id}"
     val entry = viewModel.commentReplies.entry(key)
     val page = (entry?.state as? LoadState.Ready)?.value
-    val rows = remember(parent, page?.comments) {
-        if (parent == null || page == null) emptyList() else commentThreadRows(parent, page.comments)
+    val sourceComments = remember(page?.comments) { page?.comments }
+    val prepared by produceState<PreparedReplies?>(null, parent, sourceComments) {
+        if (parent == null || sourceComments == null) {
+            value = null
+            return@produceState
+        }
+        val rows = withContext(Dispatchers.Default) {
+            commentThreadRows(parent, sourceComments) { ensureActive() }
+        }
+        value = PreparedReplies(parent.id, sourceComments, rows)
     }
+    val currentPrepared = prepared?.takeIf { it.rootId == parent?.id }
+    val rows = currentPrepared?.rows.orEmpty()
+    val preparing = page != null && currentPrepared?.comments !== sourceComments
     var selectedReply by remember(parent?.id, initiallyReply) { mutableStateOf<HupuComment?>(parent.takeIf { initiallyReply }) }
     val recipient = selectedReply ?: parent
     val actions = viewModel.commentActions
@@ -56,13 +77,14 @@ internal fun CommentRepliesSheet(viewModel: MiaopuViewModel, target: RatingTarge
                             ReplyThreadCard(row, parent, actions, selectedReply?.id == row.comment.id,
                                 onLike = { like(row.comment) }, onReply = { selectedReply = row.comment })
                         }
-                        if (state.value.comments.isEmpty()) item { DetailNotice("暂时没有回复") }
+                        if (preparing && rows.isEmpty()) item { DetailNotice("正在整理回复", loading = true) }
+                        if (!preparing && state.value.comments.isEmpty()) item { DetailNotice("暂时没有回复") }
                         if (state.value.hasMore && state.value.nextPublishTime != null) item {
-                            Row(Modifier.fillMaxWidth().clickable(enabled = !entry.isLoadingMore, role = Role.Button) {
+                            Row(Modifier.fillMaxWidth().clickable(enabled = !entry.isLoadingMore && !preparing, role = Role.Button) {
                                 viewModel.commentReplies.loadMore(target, key)
                             }.padding(start = 38.dp, top = 14.dp, bottom = 14.dp),
                                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(if (entry.isLoadingMore) "正在加载…" else if (entry.paginationError != null) "重新加载回复" else "展开更多回复",
+                                Text(if (entry.isLoadingMore || preparing) "正在加载…" else if (entry.paginationError != null) "重新加载回复" else "展开更多回复",
                                     fontSize = 14.sp, color = MiuixTheme.colorScheme.primary)
                                 Icon(LucideIcons.ChevronRight, null, Modifier.size(16.dp).rotate(90f), tint = MiuixTheme.colorScheme.primary)
                             }

@@ -8,10 +8,12 @@ internal data class CommentThreadRow(
 )
 
 /** Stable depth-first order; missing parents and malformed cycles never hide a comment. */
-internal fun commentThreadRows(root: HupuComment, replies: List<HupuComment>): List<CommentThreadRow> {
-    val unique = replies.filter { it.id != root.id }.distinctBy { it.id }
+internal fun commentThreadRows(root: HupuComment, replies: List<HupuComment>, checkActive: () -> Unit = {}): List<CommentThreadRow> {
+    checkActive()
+    val unique = replies.filter { checkActive(); it.id != root.id }.distinctBy { it.id }
     val byId = unique.associateBy { it.id } + (root.id to root)
     val children = unique.groupBy { reply ->
+        checkActive()
         reply.parentCommentId?.takeIf { it in byId && it != reply.id } ?: root.id
     }
     val visited = mutableSetOf(root.id)
@@ -20,11 +22,13 @@ internal fun commentThreadRows(root: HupuComment, replies: List<HupuComment>): L
     val stack = ArrayDeque<Pending>()
     fun enqueue(items: List<HupuComment>, depth: Int, ancestors: List<Boolean>) {
         items.asReversed().forEachIndexed { reverseIndex, comment ->
+            checkActive()
             stack.addLast(Pending(comment, depth, ancestors, reverseIndex != 0))
         }
     }
     fun drain() {
         while (stack.isNotEmpty()) {
+            checkActive()
             val row = stack.removeLast()
             if (!visited.add(row.comment.id)) continue
             val comment = row.comment.copy(parentAuthor = row.comment.parentAuthor
@@ -35,6 +39,6 @@ internal fun commentThreadRows(root: HupuComment, replies: List<HupuComment>): L
     }
     enqueue(children[root.id].orEmpty(), 1, emptyList())
     drain()
-    unique.forEach { if (it.id !in visited) { enqueue(listOf(it), 1, emptyList()); drain() } }
+    unique.forEach { checkActive(); if (it.id !in visited) { enqueue(listOf(it), 1, emptyList()); drain() } }
     return result
 }

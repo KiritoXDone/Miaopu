@@ -42,7 +42,9 @@ class HupuHttpTransportTest {
                 task.await()
                 fail("Expected network failure")
             } catch (actual: IOException) {
-                assertSame(failure, actual)
+                // Coroutine stack-trace recovery may copy the exception across await().
+                assertEquals(failure.javaClass, actual.javaClass)
+                assertEquals(failure.message, actual.message)
             }
         }
     }

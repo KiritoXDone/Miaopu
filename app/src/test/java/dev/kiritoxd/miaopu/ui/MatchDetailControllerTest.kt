@@ -7,6 +7,51 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class MatchDetailControllerTest {
+    @Test fun stageCacheIsInvalidatedByRetryAndScoreUpdate() = runBlocking {
+        var calls = 0
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        try {
+            val controller = MatchDetailController(scope, { _, stage ->
+                calls++
+                AdapterResult.success("fixture", StageRatingDetail(stage.name, null, null, emptyList(), emptyList()))
+            }, source())
+            val first = RatingStage("first", emptyList(), outBizNo = "1")
+            val second = RatingStage("second", emptyList(), outBizNo = "2")
+            controller.bind(match("a"))
+            controller.loadStage(first)
+            controller.loadStage(second)
+            controller.loadStage(first)
+            assertEquals(2, calls)
+            controller.loadStage(first, retry = true)
+            assertEquals(3, calls)
+            controller.updateTargets { it }
+            controller.loadStage(first)
+            assertEquals(4, calls)
+        } finally { scope.cancel() }
+    }
+
+    @Test fun revisitingMapUsesCacheButRefreshAndMatchSwitchFetchAgain() = runBlocking {
+        val requested = mutableListOf<String>()
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        try {
+            val controller = controller(scope, source(stats = { matchId, id ->
+                requested += "$matchId:$id"
+                stats(id)
+            }))
+            controller.bind(match("a"))
+            controller.loadStats("1")
+            controller.loadStats("2")
+            controller.loadStats("1")
+            assertEquals(listOf("a:1", "a:2"), requested)
+            controller.refresh()
+            assertEquals("a:1", requested.last())
+            assertEquals(3, requested.size)
+            controller.bind(match("b"))
+            controller.loadStats("1")
+            assertEquals("b:1", requested.last())
+        } finally { scope.cancel() }
+    }
+
     @Test fun scheduleMatchFormatIsNotUsedAsRatingBusinessType() = runBlocking {
         val parsed = HupuJsonParser.schedule("""{"result":{"dayGameData":[{"matchData":[{
             "matchId":"cs-bo3","matchName":"Aurora vs Vitality","matchType":"against",

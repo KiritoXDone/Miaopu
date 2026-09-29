@@ -128,27 +128,34 @@ class HupuAdapter(
         val treeDeferred = async {
             getAndParse(treeEndpoint, "hupu.stage.$type") { HupuJsonParser.stageRatingDetail(it) }
         }
-        val groupsDeferred = async {
-            getAndParse(groupsEndpoint, "hupu.stage.groups.$type") { HupuJsonParser.ratingGroups(it) }
+        val populatedGroupsDeferred = async {
+            val groups = getAndParse(groupsEndpoint, "hupu.stage.groups.$type") {
+                HupuJsonParser.ratingGroups(it)
+            }.data.orEmpty().sortedWith(
+                compareBy<RatingGroup> { if (it.name == "趣评") 0 else 1 }.thenByDescending { it.sort },
+            )
+            groups.map { group ->
+                async groupTask@{
+                    val endpoint = "${HupuUrls.SCORE_BASE}/bplcommentapi/bff/bpl/score_tree/groupAndSubNodes" +
+                        "?nodeId=${group.rootNodeId}&queryType=hot&page=1&pageSize=100"
+                    // Start the independent network read before waiting for the tree's display title.
+                    val response = request(endpoint)
+                    val detail = treeDeferred.await().data ?: return@groupTask group
+                    val targets = withContext(Dispatchers.Default) {
+                        response.toAdapterResult("hupu.stage.group.${group.rootNodeId}") {
+                            HupuJsonParser.ratingGroupTargets(it, detail.title)
+                        }.data.orEmpty()
+                    }
+                    group.copy(targets = targets)
+                }
+            }.map { it.await() }
         }
         val treeResult = treeDeferred.await()
-        val detail = treeResult.data ?: return@coroutineScope treeResult
-        val groups = groupsDeferred.await().data.orEmpty()
-            .sortedWith(
-                compareBy<RatingGroup> { if (it.name == "趣评") 0 else 1 }
-                    .thenByDescending { it.sort },
-            )
-
-        val populatedGroups = groups.map { group ->
-            async {
-                val endpoint = "${HupuUrls.SCORE_BASE}/bplcommentapi/bff/bpl/score_tree/groupAndSubNodes" +
-                    "?nodeId=${group.rootNodeId}&queryType=hot&page=1&pageSize=100"
-                val targets = getAndParse(endpoint, "hupu.stage.group.${group.rootNodeId}") {
-                    HupuJsonParser.ratingGroupTargets(it, detail.title)
-                }.data.orEmpty()
-                group.copy(targets = targets)
-            }
-        }.map { it.await() }
+        val detail = treeResult.data ?: run {
+            populatedGroupsDeferred.cancel()
+            return@coroutineScope treeResult
+        }
+        val populatedGroups = populatedGroupsDeferred.await()
 
         AdapterResult.success(
             source = "hupu.stage.$type",

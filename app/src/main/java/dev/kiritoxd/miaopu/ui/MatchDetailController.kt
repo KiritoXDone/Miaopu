@@ -45,9 +45,17 @@ internal class MatchDetailController(
     var selectedMapId: String? by mutableStateOf(null)
         private set
     private var stageKey: RatingStage? = null
+    private val stageCache = MatchDataCache<RatingStage, StageRatingDetail>()
+    private val statsCache = MatchDataCache<String, MatchStats>()
+
+    private fun clearCaches() {
+        stageCache.clear()
+        statsCache.clear()
+    }
 
     fun bind(next: MatchSummary) {
         if (match?.uniqueKey == next.uniqueKey) return
+        clearCaches()
         generation++
         summaryJob?.cancel()
         statsJob?.cancel()
@@ -64,6 +72,7 @@ internal class MatchDetailController(
     }
 
     fun close() {
+        clearCaches()
         generation++
         summaryJob?.cancel()
         statsJob?.cancel()
@@ -72,12 +81,14 @@ internal class MatchDetailController(
     }
 
     fun refresh() {
+        clearCaches()
         loadSummary()
         if (statistics != null) loadStats()
         stageKey?.let { loadStage(it, retry = true) }
     }
 
     fun updateTargets(transform: (RatingTarget) -> RatingTarget) {
+        stageCache.clear()
         val value = (stage as? LoadState.Ready)?.value ?: return
         stage = LoadState.Ready(value.copy(targets = value.targets.map(transform),
             groups = value.groups.map { it.copy(targets = it.targets.map(transform)) }))
@@ -106,15 +117,22 @@ internal class MatchDetailController(
 
     fun loadStage(next: RatingStage, retry: Boolean = false) {
         val current = match ?: return
-        if (!retry && stageKey == next) return
+        if (!retry && stageKey == next && stageJob?.isActive == true) return
         stageKey = next
         stageJob?.cancel()
         val token = ++stageGeneration
         val matchToken = generation
+        if (!retry) stageCache[next]?.let {
+            stage = LoadState.Ready(it)
+            return
+        }
         stage = LoadState.Loading
         stageJob = scope.launch {
             val result = stageLoader(current, next)
-            if (token == stageGeneration && matchToken == generation) stage = result.detailState()
+            if (token == stageGeneration && matchToken == generation) {
+                result.data?.let { stageCache.put(next, it) }
+                stage = result.detailState()
+            }
         }
     }
 
@@ -127,6 +145,13 @@ internal class MatchDetailController(
         statsJob?.cancel()
         val token = ++statsGeneration
         val matchToken = generation
+        val requestedMapId = mapId ?: "0"
+        statsCache[requestedMapId]?.let {
+            selectedMapId = requestedMapId
+            applyStats(it)
+            statistics = LoadState.Ready(it)
+            return
+        }
         statistics = LoadState.Loading
         selectedMapId = mapId
         statsJob = scope.launch {
@@ -143,13 +168,19 @@ internal class MatchDetailController(
             maps = result.data?.maps ?: discovered?.maps ?: maps
             selectedMapId = requestedId
             result.data?.let { data ->
-                hasStatistics = data.teams.any { team ->
-                    team.players.any { row -> row.drop(1).any { it.text.isNotBlank() && it.text != "—" } }
-                }
+                statsCache.put(requestedId, data)
+                applyStats(data)
             }
             statistics = result.detailState()
         }
     }
+    private fun applyStats(data: MatchStats) {
+        maps = data.maps
+        hasStatistics = data.teams.any { team ->
+            team.players.any { row -> row.drop(1).any { it.text.isNotBlank() && it.text != "—" } }
+        }
+    }
+
 }
 
 private fun <T> AdapterResult<T>.detailState(): LoadState<T> = data?.let { LoadState.Ready(it) }

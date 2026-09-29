@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.Composable
@@ -49,6 +50,10 @@ import dev.kiritoxd.miaopu.data.focusInitialItemIndex
 import dev.kiritoxd.miaopu.data.homeWindowAround
 import dev.kiritoxd.miaopu.data.mergeSchedules
 import dev.kiritoxd.miaopu.data.searchSchedule
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -139,9 +144,19 @@ private fun HomeSectionContent(
     innerPadding: PaddingValues,
 ) {
     val states = subscriptions.map(viewModel::scheduleStateFor)
+    val loading = states.any { it is LoadState.Loading }
     val readySchedules = states.mapNotNull { state -> (state as? LoadState.Ready)?.value }
     val failedStates = states.filterIsInstance<LoadState.Failed>()
     val mergedSchedule = remember(readySchedules) { mergeSchedules(readySchedules) }
+    var displayedSchedule by remember(subscriptions) { mutableStateOf<Schedule?>(null) }
+    // Once reading starts, a network completion must not replace the visible timeline.
+    LaunchedEffect(loading, mergedSchedule, subscriptions) {
+        if (!loading && displayedSchedule == null && readySchedules.isNotEmpty()) {
+            displayedSchedule = mergedSchedule
+        }
+    }
+    val pendingUpdate = !loading && readySchedules.isNotEmpty() &&
+        displayedSchedule != null && displayedSchedule != mergedSchedule
     val bottomPadding = innerPadding.calculateBottomPadding()
 
     Column(
@@ -152,11 +167,11 @@ private fun HomeSectionContent(
         HomeHeader(viewModel)
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             when {
+                displayedSchedule != null -> HomeContent(viewModel, checkNotNull(displayedSchedule), bottomPadding)
                 states.any { it is LoadState.Loading } -> LoadingPane(
                     label = "正在合并已订阅赛事",
                     modifier = Modifier.fillMaxSize().padding(bottom = bottomPadding),
                 )
-                mergedSchedule.days.isNotEmpty() -> HomeContent(viewModel, mergedSchedule, bottomPadding)
                 failedStates.isNotEmpty() -> ErrorPane(
                     message = failedStates.first().message,
                     retryable = failedStates.any(LoadState.Failed::retryable),
@@ -164,6 +179,10 @@ private fun HomeSectionContent(
                     modifier = Modifier.fillMaxSize().padding(bottom = bottomPadding),
                 )
                 else -> HomeContent(viewModel, mergedSchedule, bottomPadding)
+            }
+            if (pendingUpdate) {
+                TextButton("赛程已更新，点击查看", onClick = { displayedSchedule = mergedSchedule },
+                    modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
             }
         }
     }
@@ -257,11 +276,16 @@ private fun EventsPageContent(
         is LoadState.Ready -> if (searchQuery.isBlank()) {
             EventsContent(viewModel, state.value, esport, bottomPadding)
         } else {
-            val filteredSchedule = remember(state.value, searchQuery) {
-                state.value.searchSchedule(searchQuery)
+            val result by produceState<Triple<Schedule, String, Schedule>?>(null, state.value, searchQuery) {
+                delay(120)
+                value = Triple(state.value, searchQuery, withContext(Dispatchers.Default) {
+                    state.value.searchSchedule(searchQuery) { ensureActive() }
+                })
             }
-            EventsScheduleSearchResults(
-                schedule = filteredSchedule,
+            val currentResult = result?.takeIf { it.first === state.value && it.second == searchQuery }
+            if (currentResult == null) LoadingPane("正在搜索赛程", Modifier.fillMaxSize().padding(bottom = bottomPadding))
+            else EventsScheduleSearchResults(
+                schedule = currentResult.third,
                 query = searchQuery,
                 bottomPadding = bottomPadding,
                 onMatchClick = viewModel::openMatch,

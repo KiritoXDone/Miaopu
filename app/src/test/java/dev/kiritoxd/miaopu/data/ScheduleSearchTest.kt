@@ -6,6 +6,12 @@ import org.junit.Assert.assertSame
 import org.junit.Test
 
 class ScheduleSearchTest {
+    @Test(expected = java.util.concurrent.CancellationException::class)
+    fun searchChecksCancellationWhileScanning() {
+        val schedule = scheduleOf(match("1", "比赛", "决赛", "A", "B"))
+        schedule.searchSchedule("A") { throw java.util.concurrent.CancellationException() }
+    }
+
     @Test
     fun `blank query keeps the original schedule`() {
         val schedule = scheduleOf(match("1", "美国网球公开赛", "男单资格赛", "辛纳", "德约科维奇"))

@@ -3,11 +3,12 @@ package dev.kiritoxd.miaopu.data.matchdetail
 import dev.kiritoxd.miaopu.data.Esport
 import dev.kiritoxd.miaopu.data.AdapterResult
 import dev.kiritoxd.miaopu.data.AdapterStatus
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URI
+import dev.kiritoxd.miaopu.data.HupuHttpTransport
+import okhttp3.Request
 import java.net.URLEncoder
 
 /** Read-only public endpoints; no session cookie or captured device credentials. */
@@ -34,29 +35,26 @@ internal class MatchDetailAdapter : MatchDetailSource {
             "?matchId=${encode(matchId)}&boNumber=${encode(mapId)}", MatchDetailParser::stats,
     )
 
-    private suspend fun <T> get(url: String, parser: (String) -> T): AdapterResult<T> = withContext(Dispatchers.IO) {
-        val connection = URI(url).toURL().openConnection() as HttpURLConnection
-        try {
-            connection.connectTimeout = 12_000
-            connection.readTimeout = 15_000
-            connection.setRequestProperty("Accept", "application/json")
-            val code = connection.responseCode
-            if (code !in 200..299) {
-                AdapterResult.failure(url, AdapterStatus.TRANSIENT_FAILURE, "比赛数据暂时不可用", true, code)
-            } else {
-                val body = connection.inputStream.bufferedReader().use { it.readText() }
-                try {
-                    AdapterResult.success(url, parser(body))
-                } catch (_: org.json.JSONException) {
-                    AdapterResult.failure(url, AdapterStatus.INVALID_RESPONSE, "比赛数据格式已变化", true, code)
-                } catch (error: IllegalStateException) {
-                    AdapterResult.failure(url, AdapterStatus.INVALID_RESPONSE, error.message ?: "暂无比赛数据", true, code)
-                }
-            }
+    private suspend fun <T> get(url: String, parser: (String) -> T): AdapterResult<T> {
+        val response = try {
+            HupuHttpTransport.execute(Request.Builder().url(url).header("Accept", "application/json").build())
         } catch (_: IOException) {
-            AdapterResult.failure(url, AdapterStatus.TRANSIENT_FAILURE, "连接失败，请稍后重试", true)
-        } finally {
-            connection.disconnect()
+            return AdapterResult.failure(url, AdapterStatus.TRANSIENT_FAILURE, "连接失败，请稍后重试", true)
+        }
+        val code = response.status
+        if (code !in 200..299) {
+            return AdapterResult.failure(url, AdapterStatus.TRANSIENT_FAILURE, "比赛数据暂时不可用", true, code)
+        }
+        return withContext(Dispatchers.Default) {
+            try {
+                AdapterResult.success(url, parser(response.body))
+            } catch (_: org.json.JSONException) {
+                AdapterResult.failure(url, AdapterStatus.INVALID_RESPONSE, "比赛数据格式已变化", true, code)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: IllegalStateException) {
+                AdapterResult.failure(url, AdapterStatus.INVALID_RESPONSE, error.message ?: "暂无比赛数据", true, code)
+            }
         }
     }
 

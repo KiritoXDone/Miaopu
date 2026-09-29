@@ -9,11 +9,13 @@ import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URLEncoder
-import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
-import javax.net.ssl.HttpsURLConnection
+import okhttp3.Request
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import kotlinx.coroutines.CancellationException
 
 class HupuAdapter(
     private val cookieSession: HupuCookieSession,
@@ -290,32 +292,19 @@ class HupuAdapter(
         endpoint: String,
         method: String = "GET",
         body: String? = null,
-    ): HttpResponse = withContext(Dispatchers.IO) {
-        val connection = (URL(endpoint).openConnection() as HttpsURLConnection).apply {
-            requestMethod = method
-            connectTimeout = 12_000
-            readTimeout = 15_000
-            instanceFollowRedirects = true
-            setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", USER_AGENT)
-            setRequestProperty("reqId", UUID.randomUUID().toString())
-            setRequestProperty("Referer", HupuUrls.DETAIL_BASE)
-            cookieSession.cookieHeader().takeIf(String::isNotBlank)?.let { setRequestProperty("Cookie", it) }
-            if (body != null) {
-                doOutput = true
-                setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            }
-        }
-        try {
-            body?.let { connection.outputStream.bufferedWriter(Charsets.UTF_8).use { writer -> writer.write(it) } }
-            val status = connection.responseCode
-            val stream = if (status in 200..299) connection.inputStream else connection.errorStream
-            val responseBody = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
-            HttpResponse(status, responseBody)
+    ): HttpResponse {
+        val request = Request.Builder().url(endpoint)
+            .header("Accept", "application/json")
+            .header("User-Agent", USER_AGENT)
+            .header("reqId", UUID.randomUUID().toString())
+            .header("Referer", HupuUrls.DETAIL_BASE)
+        cookieSession.cookieHeader().takeIf(String::isNotBlank)?.let { request.header("Cookie", it) }
+        request.method(method, body?.toRequestBody("application/json; charset=utf-8".toMediaType()))
+        return try {
+            val response = HupuHttpTransport.execute(request.build())
+            HttpResponse(response.status, response.body)
         } catch (error: IOException) {
             HttpResponse(-1, "", error.message ?: "网络连接失败")
-        } finally {
-            connection.disconnect()
         }
     }
 
@@ -359,6 +348,8 @@ class HupuAdapter(
         }
     } catch (error: IOException) {
         AdapterResult.failure(source, AdapterStatus.TRANSIENT_FAILURE, error.message ?: "网络连接失败", true)
+    } catch (error: CancellationException) {
+        throw error
     } catch (error: Exception) {
         AdapterResult.failure(source, AdapterStatus.INVALID_RESPONSE, error.message ?: "虎扑响应格式已变化", false, status)
     }

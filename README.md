@@ -10,15 +10,17 @@ Android 第三方虎扑赛事评分客户端
 
 ## 简介
 
-喵扑专注于电竞与体育赛事的赛程、选手评分和赛后评论，涵盖英雄联盟、无畏契约、CS2、篮球、足球等项目。用户可按关注的赛事订阅内容，查看比赛结果、各局选手表现及虎扑社区讨论。
+喵扑专注于电竞与体育赛事的赛程、选手评分和赛事讨论，涵盖英雄联盟、无畏契约、CS2、篮球、足球等项目。用户可按关注的赛事订阅内容，查看比赛结果、各局选手表现及虎扑社区讨论。
 
 ## 下载与使用
 
 在 [Releases](https://github.com/KiritoXDone/Miaopu/releases/latest) 下载 APK，支持 **Android 7.0 及以上**版本。
 
-赛事订阅位于 **我的 → 赛事订阅**。首页汇总已订阅项目的近期比赛，赛事页提供完整赛程与搜索入口。比赛详情按局次展示选手评分，选手详情包含星级分布和评论。
+赛事订阅位于 **我的 → 赛事订阅**，支持搜索、分类筛选和调整订阅顺序。首页汇总已订阅项目的比赛，赛事页提供完整赛程与搜索入口。
 
-浏览赛程、评分和评论无需登录。参与评分或发表评论需在 **我的** 中登录虎扑账号。应用更新可通过 **我的 → 检查更新** 获取。
+比赛详情可按局次和队伍查看选手表现；有全场评分或技术统计的比赛，会展示对应内容。选手详情包含评分分布和评论，评论可按最热或最新排序，支持多层回复、点赞与取消点赞。
+
+浏览赛程、评分和评论无需登录。参与评分、发表评论、回复或点赞需在 **我的** 中登录虎扑账号。应用更新可通过 **我的 → 检查更新** 获取。
 
 桌面提供 **2×2 单场赛况**与 **4×2 近期赛程**两种小部件，跟随应用内的赛事订阅。可在系统的小部件列表中添加，点击比赛查看详情，点击刷新按钮更新数据。
 
@@ -26,42 +28,55 @@ Android 第三方虎扑赛事评分客户端
 
 <table>
   <tr>
-    <th>首页 · 近期赛程</th>
+    <th>首页 · 赛程汇总</th>
     <th>赛事 · 完整赛程</th>
     <th>赛事搜索</th>
   </tr>
   <tr>
-    <td><a href="docs/screenshots/home.png"><img src="docs/screenshots/home.png" width="260" alt="首页：合并已订阅项目的近期比赛、比分和状态"></a></td>
+    <td><a href="docs/screenshots/home.png"><img src="docs/screenshots/home.png" width="260" alt="首页：汇总已订阅项目的比赛、比分和状态"></a></td>
     <td><a href="docs/screenshots/events.png"><img src="docs/screenshots/events.png" width="260" alt="完整赛程：切换赛事项目并浏览各日期的比赛"></a></td>
     <td><a href="docs/screenshots/search.png"><img src="docs/screenshots/search.png" width="260" alt="赛事搜索：按 JDG 战队名称筛选赛程"></a></td>
   </tr>
   <tr>
-    <th>比赛详情 · 分局入口</th>
-    <th>单局详情 · 选手评分</th>
-    <th>选手详情 · 星级与热评</th>
+    <th>比赛详情 · 全场评分</th>
+    <th>比赛数据 · 分局统计</th>
+    <th>选手评分 · 分布与评论</th>
   </tr>
   <tr>
-    <td><a href="docs/screenshots/match.png"><img src="docs/screenshots/match.png" width="260" alt="比赛详情：JDG 对阵 FUT 的比分、局次和评分对象"></a></td>
-    <td><a href="docs/screenshots/stage.png"><img src="docs/screenshots/stage.png" width="260" alt="单局详情：战队筛选、评分排序和选手热评卡片"></a></td>
-    <td><a href="docs/screenshots/player.png"><img src="docs/screenshots/player.png" width="260" alt="选手详情：jkuro 的评分、星级分布与亮回复"></a></td>
+    <td><a href="docs/screenshots/match.png"><img src="docs/screenshots/match.png" width="260" alt="比赛详情：JDG 对阵 FUT 的比分、全场评分及小局与队伍切换"></a></td>
+    <td><a href="docs/screenshots/stats.png"><img src="docs/screenshots/stats.png" width="260" alt="比赛数据：全场与分局切换、双方选手的技术统计"></a></td>
+    <td><a href="docs/screenshots/player.png"><img src="docs/screenshots/player.png" width="260" alt="选手评分：jkuro 的评分分布、我的评分与热门评论"></a></td>
   </tr>
   <tr>
-    <th>评论 · 展开子回复</th>
+    <th>评论 · 多层回复</th>
     <th>赛事订阅</th>
     <th>我的喵扑</th>
   </tr>
   <tr>
-    <td><a href="docs/screenshots/replies.png"><img src="docs/screenshots/replies.png" width="260" alt="评论详情：原地展开子回复，展示文字、图片和点赞数"></a></td>
+    <td><a href="docs/screenshots/replies.png"><img src="docs/screenshots/replies.png" width="260" alt="评论详情：回复面板中的多层关系、评论内容和点赞数"></a></td>
     <td><a href="docs/screenshots/subscriptions.png"><img src="docs/screenshots/subscriptions.png" width="260" alt="赛事订阅：按分类管理已订阅的电竞与体育项目"></a></td>
     <td><a href="docs/screenshots/profile.png"><img src="docs/screenshots/profile.png" width="260" alt="我的喵扑：登录状态、订阅管理、检查更新与关于入口"></a></td>
   </tr>
 </table>
 
 <details>
-  <summary>查看评分与评论输入界面</summary>
-  <p>在选手详情点击“写评论”可打开星级与评论输入面板。</p>
-  <a href="docs/screenshots/compose.png"><img src="docs/screenshots/compose.png" width="300" alt="评分与评论输入面板：选择星级、填写评论及发送按钮"></a>
+  <summary>查看回复输入界面</summary>
+  <p>点击具体评论可打开回复输入区，引用原评论并唤起键盘。</p>
+  <a href="docs/screenshots/compose.png"><img src="docs/screenshots/compose.png" width="300" alt="回复输入界面：原评论引用、正文输入区、发送按钮与键盘"></a>
 </details>
+
+### 桌面小部件
+
+<table>
+  <tr>
+    <th>4×2 · 近期赛程</th>
+    <th>2×2 · 单场赛况</th>
+  </tr>
+  <tr>
+    <td><a href="docs/screenshots/widget-4x2.png"><img src="docs/screenshots/widget-4x2.png" width="520" alt="4×2 小组件：比赛时间、对阵队伍与赛况"></a></td>
+    <td><a href="docs/screenshots/widget-2x2.png"><img src="docs/screenshots/widget-2x2.png" width="260" alt="2×2 小组件：单场比赛时间、赛事与对阵队伍"></a></td>
+  </tr>
+</table>
 
 ## 反馈与贡献
 

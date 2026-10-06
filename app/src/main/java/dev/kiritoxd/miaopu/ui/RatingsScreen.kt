@@ -19,6 +19,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 @Composable
 fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
     val detail = viewModel.matchDetail
+    val liveScore = rememberMatchLiveScore(match)
     val density = LocalDensity.current
     val width = LocalConfiguration.current.screenWidthDp
     val layout = remember(match.uniqueKey, width, density.density, density.fontScale) { DetailLayoutState() }
@@ -102,7 +103,7 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
             contentPadding = PaddingValues(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            item(key = "hero") { MatchHero(match) }
+            item(key = "hero") { MatchHero(match.withLiveScore(liveScore), liveScore) }
             if (visibleHeader == null) {
                 item(key = "initial-loading") { DetailNotice("正在加载比赛详情", loading = true) }
                 return@LazyColumn

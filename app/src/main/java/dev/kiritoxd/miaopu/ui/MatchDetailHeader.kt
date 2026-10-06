@@ -11,12 +11,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.kiritoxd.miaopu.data.MatchSummary
 import dev.kiritoxd.miaopu.data.Team
+import dev.kiritoxd.miaopu.data.matchdetail.MatchLiveScore
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-internal fun MatchHero(match: MatchSummary) {
+internal fun MatchHero(match: MatchSummary, liveScore: MatchLiveScore? = null) {
     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         cornerRadius = 18.dp, insideMargin = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -28,8 +29,16 @@ internal fun MatchHero(match: MatchSummary) {
                 overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
             if (match.teams.size == 2) Row(Modifier.fillMaxWidth().padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                 HeroTeam(match.teams.getOrNull(0), Modifier.weight(1f))
-                Text(overallMatchScore(match) ?: "VS", modifier = Modifier.weight(1.2f),
-                    fontSize = 36.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 1)
+                Column(Modifier.weight(1.2f), horizontalAlignment = Alignment.CenterHorizontally) {
+                    liveScore?.currentMap?.let {
+                        Text(it, fontSize = 12.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                    }
+                    Text(overallMatchScore(match) ?: "VS", fontSize = 36.sp,
+                        fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 1)
+                    liveScore?.currentScore?.let {
+                        Text("当前比分 $it", fontSize = 12.sp, color = MiuixTheme.colorScheme.primary)
+                    }
+                }
                 HeroTeam(match.teams.getOrNull(1), Modifier.weight(1f))
             } else {
                 Text(match.teams.joinToString(" · ") { it.name }.ifBlank { match.esport.title },

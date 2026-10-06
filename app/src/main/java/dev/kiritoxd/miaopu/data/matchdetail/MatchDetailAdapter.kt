@@ -19,6 +19,14 @@ internal interface MatchDetailSource {
 }
 
 internal class MatchDetailAdapter : MatchDetailSource {
+    suspend fun liveScore(matchId: String, polling: Boolean): AdapterResult<MatchLiveScore> {
+        val endpoint = if (polling) "liveRoomHeaderBarForPolling" else "liveRoomHeaderBar"
+        return get(
+            "https://match-api.hupu.com/1/8.2.63/matchallapi/common/$endpoint" +
+                "?matchId=${encode(matchId)}&competitionType=common_match",
+        ) { body -> parseMatchLiveScore(body, matchId) }
+    }
+
     override suspend fun allScores(matchId: String, businessType: String): AdapterResult<MatchAllScores> = get(
         "https://match-api.hupu.com/1/8.2.58/matchallapi/queryMatchAllScoreInfo" +
             "?businessType=${encode(businessType)}&matchId=${encode(matchId)}", MatchDetailParser::allScores,

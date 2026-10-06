@@ -5,9 +5,11 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,72 +20,75 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-// Nagram FilterTabsView: selection position and text colors share a 320 ms ease-out curve.
 internal const val TabMotionDurationMillis = 320
 internal val TabMotionEasing = CubicBezierEasing(0.23f, 1f, 0.32f, 1f)
 
 internal enum class DetailTabStyle { PAGE, MAP, TEAM }
 
-/** Compact segmented controls follow the match-detail design, with native tab semantics. */
+/** The approved layout uses text-width map tabs and equal-width page/team controls. */
 @Composable
 internal fun DetailTabs(
     labels: List<String>, selected: Int, style: DetailTabStyle = DetailTabStyle.MAP,
     logos: List<String?> = emptyList(), onSelect: (Int) -> Unit,
 ) {
     if (labels.isEmpty()) return
-    val colors = MiuixTheme.colorScheme
-    val connected = style != DetailTabStyle.MAP
-    val overflowing = labels.size > 3
     val selectedIndex = selected.coerceIn(labels.indices)
-    val spacing = if (connected) 2.dp else 8.dp
-    val scroll = rememberScrollState()
+    if (style == DetailTabStyle.MAP) {
+        MapTabs(labels, selectedIndex, onSelect)
+        return
+    }
+    val colors = MiuixTheme.colorScheme
+    val isPage = style == DetailTabStyle.PAGE
     val density = LocalDensity.current
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-    BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-        val tabWidth = if (overflowing) 96.dp else (maxWidth - spacing * (labels.size - 1)) / labels.size
-        val contentWidth = if (overflowing) tabWidth * labels.size + spacing * (labels.size - 1) else maxWidth
-        // Read only in graphicsLayer: progress never recomposes or remeasures the tab row.
-        val indicatorPosition = animateFloatAsState(
-            targetValue = selectedIndex.toFloat(),
-            animationSpec = tween(TabMotionDurationMillis, easing = TabMotionEasing), label = "detailTabIndicator",
-        )
-        val stridePx = with(density) { (tabWidth + spacing).toPx() }
-        val viewportWidth = maxWidth
-        LaunchedEffect(selectedIndex, tabWidth, viewportWidth, scroll.maxValue) {
-            if (overflowing) {
-                val target = with(density) { ((tabWidth + spacing) * selectedIndex - (viewportWidth - tabWidth) / 2).roundToPx() }
-                scroll.animateScrollTo(target.coerceIn(0, scroll.maxValue), tween(TabMotionDurationMillis, easing = TabMotionEasing))
+    val indicatorPosition = animateFloatAsState(selectedIndex.toFloat(),
+        tween(TabMotionDurationMillis, easing = TabMotionEasing), label = "detailTabIndicator")
+    BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+        .then(if (isPage) Modifier else Modifier.clip(RoundedCornerShape(16.dp))
+            .background(colors.onSurface.copy(alpha = 0.055f)).padding(4.dp))) {
+        val tabWidth = maxWidth / labels.size
+        val stride = with(density) { tabWidth.toPx() }
+        Box(Modifier.matchParentSize()) {
+            if (isPage) Box(Modifier.align(Alignment.BottomStart).fillMaxWidth().height(1.dp)
+                .background(colors.dividerLine))
+            Box(Modifier.align(if (isPage) Alignment.BottomStart else Alignment.TopStart)
+                .graphicsLayer { translationX = indicatorPosition.value * stride * if (rtl) -1f else 1f }
+                .width(tabWidth).then(if (isPage) Modifier.height(4.dp) else Modifier.fillMaxHeight()),
+                contentAlignment = Alignment.Center) {
+                Box(Modifier.then(if (isPage) Modifier.width(30.dp) else Modifier.fillMaxWidth())
+                    .fillMaxHeight().clip(RoundedCornerShape(if (isPage) 2.dp else 12.dp))
+                    .background(if (isPage) colors.primary else colors.surfaceContainer))
             }
         }
-        Box(Modifier.fillMaxWidth().then(if (overflowing) Modifier.horizontalScroll(scroll) else Modifier)) {
-            Box(Modifier.width(contentWidth).clip(RoundedCornerShape(50))
-                .background(if (connected) colors.onSurface.copy(alpha = 0.055f) else Color.Transparent)) {
-                // A single shared indicator moves behind the labels, including during interrupted transitions.
-                if (connected) Box(Modifier.matchParentSize()) {
-                    Box(Modifier.graphicsLayer {
-                        translationX = indicatorPosition.value * stridePx * if (rtl) -1f else 1f
-                    }.width(tabWidth).fillMaxHeight().clip(RoundedCornerShape(50))
-                        .background(if (style == DetailTabStyle.PAGE) colors.primary else colors.surfaceContainer))
-                }
-                Row(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(spacing)) {
-                    labels.forEachIndexed { index, label ->
-                        DetailTabItem(label, logos.getOrNull(index), index == selectedIndex, style, tabWidth) {
-                            if (index != selectedIndex) onSelect(index)
-                        }
+        Row(Modifier.fillMaxWidth().selectableGroup()) {
+            labels.forEachIndexed { index, label ->
+                val active = index == selectedIndex
+                val foreground by animateColorAsState(
+                    if (active) colors.onSurface else colors.onSurfaceVariantSummary,
+                    tween(TabMotionDurationMillis, easing = TabMotionEasing), label = "detailTabText")
+                Row(Modifier.weight(1f).heightIn(min = 48.dp).clip(RoundedCornerShape(12.dp))
+                    .selectable(active, role = Role.Tab, onClick = { if (!active) onSelect(index) })
+                    .padding(horizontal = 8.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                    logos.getOrNull(index)?.let { logo ->
+                        AsyncImage(logo, null, Modifier.size(26.dp))
+                        Spacer(Modifier.width(7.dp))
                     }
+                    Text(label, color = foreground, fontSize = if (isPage) 17.sp else 14.sp,
+                        fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
@@ -91,34 +96,29 @@ internal fun DetailTabs(
 }
 
 @Composable
-private fun DetailTabItem(
-    label: String, logo: String?, active: Boolean, style: DetailTabStyle,
-    width: androidx.compose.ui.unit.Dp, onSelect: () -> Unit,
-) {
+private fun MapTabs(labels: List<String>, selected: Int, onSelect: (Int) -> Unit) {
     val colors = MiuixTheme.colorScheme
-    val connected = style != DetailTabStyle.MAP
-    val background by animateColorAsState(
-        if (connected) Color.Transparent else if (active) colors.primary.copy(alpha = 0.14f)
-        else colors.onSurface.copy(alpha = 0.045f), tween(TabMotionDurationMillis, easing = TabMotionEasing), label = "detailTabBackground",
-    )
-    val foreground by animateColorAsState(
-        when {
-            active && style == DetailTabStyle.PAGE -> colors.onPrimary
-            active && style == DetailTabStyle.MAP -> colors.primary
-            else -> colors.onSurface
-        }, tween(TabMotionDurationMillis, easing = TabMotionEasing), label = "detailTabText",
-    )
-    Row(Modifier.width(width).heightIn(min = if (connected) 36.dp else 32.dp)
-        .clip(RoundedCornerShape(50)).background(background)
-        .selectable(active, interactionSource = null, indication = null, role = Role.Tab, onClick = onSelect)
-        .padding(horizontal = 6.dp, vertical = 7.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-        if (logo != null) {
-            AsyncImage(logo, null, Modifier.size(22.dp))
-            Spacer(Modifier.width(6.dp))
+    val listState = rememberLazyListState()
+    LaunchedEffect(selected, labels) {
+        if (listState.layoutInfo.visibleItemsInfo.none { it.index == selected }) {
+            listState.animateScrollToItem(selected)
         }
-        Text(label, color = foreground, fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
-            maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+    LazyRow(state = listState, modifier = Modifier.fillMaxWidth().selectableGroup(),
+        contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        itemsIndexed(labels) { index, label ->
+            val active = index == selected
+            val background by animateColorAsState(
+                if (active) colors.primary.copy(alpha = 0.1f) else colors.onSurface.copy(alpha = 0.045f),
+                tween(TabMotionDurationMillis, easing = TabMotionEasing), label = "mapTabBackground")
+            Box(Modifier.heightIn(min = 44.dp).clip(RoundedCornerShape(10.dp))
+                .background(background).border(1.dp, if (active) colors.primary else Color.Transparent, RoundedCornerShape(10.dp))
+                .selectable(active, role = Role.Tab, onClick = { if (!active) onSelect(index) })
+                .padding(horizontal = 16.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
+                Text(label, color = if (active) colors.primary else colors.onSurfaceVariantSummary,
+                    fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+            }
+        }
     }
 }
 

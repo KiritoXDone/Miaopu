@@ -59,7 +59,6 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
     val stagePending = readyStage == null
     val statsPending = readyStats == null
     var groupIndex by rememberSaveable(match.uniqueKey, selectedStage?.outBizNo, stageIndex) { mutableIntStateOf(0) }
-    var orderIndex by rememberSaveable(match.uniqueKey) { mutableIntStateOf(0) }
     val groups = remember(stageDetail, match.teams) {
         stageDetail?.groups.orEmpty().filter { it.name != "趣评" && it.targets.isNotEmpty() }
             .sortedBy { group -> match.teams.indexOfFirst { it.name == group.name }.takeIf { it >= 0 } ?: Int.MAX_VALUE }
@@ -70,8 +69,8 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
         else groups.getOrNull(selectedGroup)?.targets ?: stageDetail?.targets.orEmpty()
     // Score/count updates refresh card values without moving cards under the reader's finger.
     val targetOrder = remember(match.uniqueKey, selectedStageIndex, selectedStage?.outBizType, selectedStage?.outBizNo,
-        funSelected, selectedGroup, orderIndex, targets.isEmpty(), stagePending) {
-        orderRatingTargets(targets, StageTargetOrder.entries[orderIndex])
+        funSelected, selectedGroup, targets.isEmpty(), stagePending) {
+        orderRatingTargets(targets, StageTargetOrder.HOT)
             .map { it.outBizType to it.outBizNo }.distinct()
     }
     val orderedTargets = remember(targets, targetOrder) {
@@ -150,13 +149,9 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
                                         DetailTabs(groupNames, selectedGroup, style = DetailTabStyle.TEAM, logos = groups.map { it.logoUrl }) { groupIndex = it }
                                     }
                                 }
-                                item(key = "order") {
-                                    StableDetailSlot(stagePending, layout, "order", notice = if (groups.isEmpty() || funSelected) ({
-                                        StageLoadNotice(detail.stage) {
-                                            selectedStage?.let { detail.loadStage(it, retry = true) }
-                                        }
-                                    }) else null) {
-                                        DetailOrderSelector(orderIndex) { orderIndex = it }
+                                if (stagePending && (groups.isEmpty() || funSelected)) item(key = "stage-progress") {
+                                    StageLoadNotice(detail.stage) {
+                                        selectedStage?.let { detail.loadStage(it, retry = true) }
                                     }
                                 }
                                 if (targets.isEmpty()) item { DetailNotice("这个分组暂时没有评分对象") }

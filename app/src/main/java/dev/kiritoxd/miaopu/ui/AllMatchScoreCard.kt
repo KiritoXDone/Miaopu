@@ -25,7 +25,6 @@ internal fun AllMatchScoreCard(scores: MatchAllScores) {
     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), cornerRadius = 18.dp,
         insideMargin = PaddingValues(12.dp)) {
         Text("全场评分", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        Text("根据单局评分综合得出", fontSize = 11.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
         scores.teams.chunked(2).forEach { pair ->
             Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                 ScoreTeamHeading(pair.first(), false)

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalDensity
@@ -24,58 +25,69 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 internal fun MatchStatsTable(team: StatsTeam, scroll: ScrollState = rememberScrollState()) {
-    val rowHeight = with(LocalDensity.current) { 30.sp.toDp() }.coerceAtLeast(30.dp)
-    val headerHeight = with(LocalDensity.current) { 34.sp.toDp() }.coerceAtLeast(34.dp)
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), cornerRadius = 18.dp,
+    val colors = MiuixTheme.colorScheme
+    val density = LocalDensity.current
+    val rowHeight = with(density) { 40.sp.toDp() }.coerceAtLeast(44.dp)
+    val headerHeight = with(density) { 36.sp.toDp() }.coerceAtLeast(40.dp)
+    val nameWidth = with(density) { 112.sp.toDp() }.coerceAtLeast(112.dp)
+    val minCellWidth = with(density) { 54.sp.toDp() }.coerceAtLeast(54.dp)
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), cornerRadius = 14.dp,
         insideMargin = PaddingValues(0.dp)) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (team.logoUrl != null) AsyncImage(team.logoUrl, contentDescription = null, modifier = Modifier.size(24.dp))
-            Text(team.name, modifier = Modifier.weight(1f), fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            team.score?.let { Text(it, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
-        }
-        Row(Modifier.fillMaxWidth()) {
-            // Only the stats column scrolls, keeping player names visible at every offset.
-            Column(Modifier.width(136.dp)) {
-                Box(Modifier.fillMaxWidth().height(headerHeight).background(MiuixTheme.colorScheme.onSurface.copy(alpha = 0.035f)), contentAlignment = Alignment.CenterStart) {
-                    Text("选手", modifier = Modifier.padding(start = 12.dp), fontSize = 12.sp,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val firstColumnWidth = nameWidth.coerceAtMost(maxWidth * 0.45f)
+            val columnCount = (team.columns.size - 1).coerceAtLeast(1)
+            val cellWidth = ((maxWidth - firstColumnWidth) / columnCount).coerceAtLeast(minCellWidth)
+            val headerColor = colors.primary.copy(alpha = 0.045f)
+            Row(Modifier.fillMaxWidth()) {
+                // Keep the team header and player identities visible while numeric columns scroll.
+                Column(Modifier.width(firstColumnWidth)) {
+                    Row(Modifier.fillMaxWidth().height(headerHeight).background(headerColor)
+                        .padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        team.logoUrl?.let { AsyncImage(it, null, Modifier.size(24.dp)) }
+                        Text(team.name, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                            maxLines = 2, lineHeight = 14.sp, overflow = TextOverflow.Ellipsis)
+                    }
+                    team.players.forEach { cells ->
+                        Row(Modifier.fillMaxWidth().height(rowHeight).padding(horizontal = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            val player = cells.firstOrNull()
+                            player?.imageUrl?.let { AsyncImage(it, null, Modifier.size(28.dp).clip(CircleShape)) }
+                            Text(player?.text ?: "—", maxLines = 2, overflow = TextOverflow.Ellipsis,
+                                fontSize = 12.sp, lineHeight = 14.sp)
+                        }
+                        TableDivider()
+                    }
                 }
-                team.players.forEachIndexed { index, cells ->
-                    Row(Modifier.fillMaxWidth().height(rowHeight).background(tableRowColor(index)).padding(horizontal = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        val player = cells.firstOrNull()
-                        if (player?.imageUrl != null) AsyncImage(player.imageUrl, contentDescription = null, modifier = Modifier.size(24.dp).clip(CircleShape))
-                        Text(player?.text ?: "—", maxLines = 2, overflow = TextOverflow.Ellipsis,
-                            fontSize = 12.sp, lineHeight = 14.sp, fontWeight = FontWeight.Normal)
+                Column(Modifier.weight(1f).horizontalScroll(scroll)) {
+                    Row(Modifier.height(headerHeight).background(headerColor)) {
+                        team.columns.drop(1).forEach { column -> StatText(column, header = true, width = cellWidth) }
+                    }
+                    team.players.forEach { cells ->
+                        Row(Modifier.height(rowHeight)) {
+                            team.columns.drop(1).forEachIndexed { index, _ ->
+                                StatText(cells.getOrNull(index + 1)?.text ?: "—", header = false, width = cellWidth)
+                            }
+                        }
+                        TableDivider(Modifier.width(cellWidth * (team.columns.size - 1).coerceAtLeast(0)))
                     }
                 }
             }
-            Column(Modifier.weight(1f).horizontalScroll(scroll)) {
-                Row(Modifier.height(headerHeight).background(MiuixTheme.colorScheme.onSurface.copy(alpha = 0.035f))) {
-                    team.columns.drop(1).forEach { column -> StatText(column, header = true) }
-                }
-                team.players.forEachIndexed { index, cells ->
-                    Row(Modifier.height(rowHeight).background(tableRowColor(index))) {
-                        cells.drop(1).forEach { cell -> StatText(cell.text, header = false) }
-                    }
-                }
-            }
         }
-        Spacer(Modifier.height(8.dp))
     }
 }
 
 @Composable
-private fun StatText(value: String, header: Boolean) {
-    Box(Modifier.width(68.dp).fillMaxHeight().padding(horizontal = 4.dp), contentAlignment = Alignment.Center) {
+private fun TableDivider(modifier: Modifier = Modifier.fillMaxWidth()) {
+    Box(modifier.height(0.5.dp).background(MiuixTheme.colorScheme.dividerLine.copy(alpha = 0.5f)))
+}
+
+@Composable
+private fun StatText(value: String, header: Boolean, width: Dp) {
+    Box(Modifier.width(width).fillMaxHeight().padding(horizontal = 4.dp), contentAlignment = Alignment.Center) {
         Text(value, textAlign = TextAlign.Center, fontSize = 12.sp, lineHeight = 14.sp,
             fontWeight = if (header) FontWeight.Normal else FontWeight.Medium,
             color = if (header) MiuixTheme.colorScheme.onSurfaceVariantSummary else MiuixTheme.colorScheme.onSurface,
             maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
-
-@Composable
-private fun tableRowColor(index: Int) = if (index % 2 == 0) MiuixTheme.colorScheme.surfaceContainer
-    else MiuixTheme.colorScheme.onSurface.copy(alpha = 0.025f)

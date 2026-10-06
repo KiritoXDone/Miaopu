@@ -170,6 +170,13 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
                         detail.loadStats(detail.maps[it].id)
                     }
                 }
+                if (statsDetail?.teams?.size == 2) {
+                    item(key = "map-score") {
+                        StableDetailSlot(statsPending, layout, "map-score") {
+                            MatchMapScoreCard(statsDetail.teams)
+                        }
+                    }
+                }
                 if (statsDetail == null) {
                     item(key = "stats-notice") { StatsLoadNotice(detail.statistics) { detail.loadStats() } }
                 } else if (statsDetail.teams.isEmpty() || statsDetail.teams.all { it.players.isEmpty() }) {

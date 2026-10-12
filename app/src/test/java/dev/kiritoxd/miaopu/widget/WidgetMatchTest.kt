@@ -24,6 +24,51 @@ class WidgetMatchTest {
         assertTrue(selectWidgetMatches(input, now).isEmpty())
     }
 
+    @Test fun `wide schedule retains three results even with many upcoming matches`() {
+        val upcoming = (1..8).map { match("next-$it", "未开始", now + it * hour) }
+        val history = (1..5).map { match("done-$it", "已结束", now - it * hour) }
+        val selected = selectWidgetScheduleMatches((upcoming + history).reversed(), now)
+        assertEquals(listOf("next-1", "next-2", "next-3", "done-1", "done-2", "done-3"), selected.map { it.id })
+        assertEquals(upcoming.take(3), selected.take(3)) // Narrow widgets keep their existing priority.
+    }
+
+    @Test fun `live matches lead the recent section without replacing history`() {
+        val live = match("live", "进行中", now - hour)
+        val input = (1..4).map { match("next-$it", "未开始", now + it * hour) } +
+            (1..4).map { match("done-$it", "已结束", now - it * hour) } + live
+        val selected = selectWidgetScheduleMatches(input, now)
+        assertEquals(listOf("live", "next-1", "next-2", "done-1", "done-2", "done-3"), selected.map { it.id })
+        assertEquals(live, selected.first()) // Single-match widget still opens the live match.
+    }
+
+    @Test fun `schedule sections preserve filtering and deduplication`() {
+        val done = match("done", "已结束", now - hour)
+        val next = match("next", "未开始", now + hour)
+        val input = listOf(done, done, next, next,
+            match("old", "已结束", now - 49 * hour), match("stale-live", "进行中", now - 13 * hour),
+            match("past", "未开始", now - hour), match("far", "未开始", now + 8 * 24 * hour),
+            next.copy(id = "unknown", businessId = "removed"))
+        assertEquals(listOf(next, done), selectWidgetScheduleMatches(input, now))
+    }
+
+    @Test fun `missing sections stay empty instead of borrowing matches from the other side`() {
+        val history = (1..4).map { match("done-$it", "已结束", now - it * hour) }
+        val upcoming = (1..4).map { match("next-$it", "未开始", now + it * hour) }
+        assertEquals(history.take(3), selectWidgetScheduleMatches(history, now))
+        assertEquals(upcoming.take(3), selectWidgetScheduleMatches(upcoming, now))
+        assertTrue(selectWidgetScheduleMatches(emptyList(), now).isEmpty())
+        assertTrue(selectWidgetScheduleMatches(history + upcoming, now, 0).isEmpty())
+    }
+
+    @Test fun `cache limit retains both sections within sixty matches`() {
+        val input = (1..70).map { match("next-$it", "未开始", now + it * hour) } +
+            (1..40).map { match("done-$it", "已结束", now - it * hour) }
+        val cached = selectWidgetScheduleMatches(input, now, 30)
+        assertEquals(60, cached.size)
+        assertEquals(30, cached.count(WidgetMatch::terminal))
+        assertEquals(6, selectWidgetScheduleMatches(cached, now).size)
+    }
+
     @Test fun `does not guess live from a scheduled start time`() {
         assertTrue(selectWidgetMatches(listOf(match("past", "未开始", now - hour)), now).isEmpty())
     }

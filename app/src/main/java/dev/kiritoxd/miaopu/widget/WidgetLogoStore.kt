@@ -37,7 +37,7 @@ internal class WidgetLogoStore(private val context: Context) {
             directory.mkdirs()
             val changed = coroutineScope {
                 matches.flatMap { it.teams }.mapNotNull { it.logoUrl }
-                    .filter { it.startsWith("https://") }.distinct().take(6).map { url ->
+                    .filter { it.startsWith("https://") }.distinct().take(12).map { url ->
                         async {
                             if (fileFor(url).isFile) return@async false
                             withTimeoutOrNull(8_000) {

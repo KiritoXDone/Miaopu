@@ -74,6 +74,17 @@ internal fun selectWidgetMatches(matches: List<WidgetMatch>, now: Long, limit: I
     return (live + next + recent).take(limit.coerceAtLeast(0))
 }
 
+/** Keep both sections before applying a display limit, so upcoming matches cannot crowd out history. */
+internal fun selectWidgetScheduleMatches(
+    matches: List<WidgetMatch>, now: Long, sectionLimit: Int = 3,
+): List<WidgetMatch> {
+    val candidates = selectWidgetMatches(matches, now, Int.MAX_VALUE)
+    val limit = sectionLimit.coerceAtLeast(0)
+    // Preserve the existing priority for the single-match and narrow schedule widgets.
+    return candidates.filterNot(WidgetMatch::terminal).take(limit) +
+        candidates.filter(WidgetMatch::terminal).take(limit)
+}
+
 internal fun WidgetMatch.scoreLabel(): String = when {
     !live && !terminal -> "VS"
     teams.size == 2 -> "${teams[0].score?.takeIf(String::isNotBlank) ?: "—"} : ${teams[1].score?.takeIf(String::isNotBlank) ?: "—"}"

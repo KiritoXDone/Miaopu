@@ -45,7 +45,7 @@ internal class WidgetScheduleStore(private val context: Context) {
             old.copy(attemptedAt = startedAt, failed = true)
         } else {
             WidgetScheduleSnapshot(
-                matches = selectWidgetMatches(schedule.days.flatMap { it.matches }.map { it.toWidgetMatch() }, startedAt, 60),
+                matches = selectWidgetScheduleMatches(schedule.days.flatMap { it.matches }.map { it.toWidgetMatch() }, startedAt, 30),
                 updatedAt = System.currentTimeMillis(),
                 attemptedAt = startedAt,
             )
@@ -56,7 +56,7 @@ internal class WidgetScheduleStore(private val context: Context) {
     fun state(now: Long): WidgetScheduleState {
         val snapshots = EsportSubscriptionStore(context).subscriptions().map(::snapshot)
         return WidgetScheduleState(
-            matches = selectWidgetMatches(snapshots.flatMap { it.matches }, now),
+            matches = selectWidgetScheduleMatches(snapshots.flatMap { it.matches }, now),
             updatedAt = snapshots.map { it.updatedAt }.filter { it > 0 }.minOrNull() ?: 0,
             failed = snapshots.any { it.failed },
             hasFetched = snapshots.any { it.attemptedAt > 0 },

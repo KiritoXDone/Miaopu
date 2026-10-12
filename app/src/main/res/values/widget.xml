@@ -8,6 +8,11 @@
     <string name="widget_refresh">刷新赛程</string>
     <string name="widget_all">全部赛程 ›</string>
     <string name="widget_loading">正在加载赛程</string>
+    <string name="widget_history_description">历史赛程</string>
+    <string name="widget_recent_description">进行中与近期赛程</string>
+    <string name="widget_history_empty">暂无历史赛程</string>
+    <string name="widget_recent_empty">暂无近期赛程</string>
+    <dimen name="widget_schedule_column_gap">16dp</dimen>
     <color name="widget_background">#FFFFFF</color>
     <color name="widget_text">#18191C</color>
     <color name="widget_secondary">#69717E</color>

@@ -40,10 +40,10 @@ internal object WidgetRenderer {
             val manager = AppWidgetManager.getInstance(context)
             ids(context).forEach { (id, wide) ->
                 val options = manager.getAppWidgetOptions(id)
-                val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 160)
-                val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, if (wide) 340 else 170)
                 val largeFont = context.resources.configuration.fontScale > 1.3f
-                val views = create(context, id, wide, state, now, height, largeFont, refreshing, width)
+                val views = responsiveWidgetViews(options, wide) { width, height ->
+                    create(context, id, wide, state, now, height, largeFont, refreshing, width)
+                }
                 manager.updateAppWidget(id, views)
             }
         }
@@ -107,8 +107,30 @@ internal object WidgetRenderer {
             views.setViewVisibility(R.id.widget_date, if (largeFont) View.GONE else View.VISIBLE)
             views.setViewVisibility(R.id.widget_rows, if (empty) View.GONE else View.VISIBLE)
             views.removeAllViews(R.id.widget_rows)
-            state.matches.take(if (contentHeight < 130 || largeFont && contentHeight < 175) 1 else if (compact) 2 else 3).forEach { match ->
-                views.addView(R.id.widget_rows, row(context, id, match, now, largeFont))
+            val rowCount = if (contentHeight < 130 || largeFont && contentHeight < 175) 1 else if (compact) 2 else 3
+            if (!empty && WidgetScheduleLayout.hasTwoColumns(context, width, compact)) {
+                val columns = RemoteViews(context.packageName, R.layout.widget_schedule_columns)
+                fun bindColumn(rowsId: Int, emptyId: Int, matches: List<WidgetMatch>) {
+                    columns.setViewVisibility(rowsId, if (matches.isEmpty()) View.GONE else View.VISIBLE)
+                    columns.setViewVisibility(emptyId, if (matches.isEmpty()) View.VISIBLE else View.GONE)
+                    columns.removeAllViews(rowsId)
+                    matches.take(rowCount).forEach { match ->
+                        columns.addView(rowsId, row(context, id, match, now, largeFont))
+                    }
+                    if (matches.isNotEmpty()) repeat((rowCount - matches.size).coerceAtLeast(0)) {
+                        // Keep opposing rows aligned when one section has fewer matches.
+                        columns.addView(rowsId, RemoteViews(context.packageName, R.layout.widget_schedule_row).apply {
+                            setViewVisibility(R.id.widget_row, View.INVISIBLE)
+                        })
+                    }
+                }
+                bindColumn(R.id.widget_history_rows, R.id.widget_history_empty, state.matches.filter(WidgetMatch::terminal))
+                bindColumn(R.id.widget_recent_rows, R.id.widget_recent_empty, state.matches.filterNot(WidgetMatch::terminal))
+                views.addView(R.id.widget_rows, columns)
+            } else {
+                state.matches.take(rowCount).forEach { match ->
+                    views.addView(R.id.widget_rows, row(context, id, match, now, largeFont))
+                }
             }
         } else {
             if (compact) {

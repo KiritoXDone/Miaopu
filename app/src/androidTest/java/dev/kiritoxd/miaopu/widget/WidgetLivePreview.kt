@@ -17,12 +17,13 @@ internal object WidgetLivePreview {
         val widgets = WidgetRenderer.ids(context)
         widgets.forEach { (id, wide) ->
             val options = manager.getAppWidgetOptions(id)
-            val views = WidgetRenderer.create(context, id, wide, preview, now,
-                height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180),
-                width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, if (wide) 340 else 170),
-                largeFont = context.resources.configuration.fontScale > 1.3f)
-            views.setTextViewText(R.id.widget_footer, if (wide) "演示数据 · 刷新恢复" else "${live.sportLabel} · 演示")
-            views.setContentDescription(R.id.widget_root, "正在展示模拟赛况，刷新恢复真实数据")
+            val views = responsiveWidgetViews(options, wide) { width, height ->
+                WidgetRenderer.create(context, id, wide, preview, now, height = height, width = width,
+                    largeFont = context.resources.configuration.fontScale > 1.3f).apply {
+                    setTextViewText(R.id.widget_footer, if (wide) "演示数据 · 刷新恢复" else "${live.sportLabel} · 演示")
+                    setContentDescription(R.id.widget_root, "正在展示模拟赛况，刷新恢复真实数据")
+                }
+            }
             manager.updateAppWidget(id, views)
         }
         return widgets.size

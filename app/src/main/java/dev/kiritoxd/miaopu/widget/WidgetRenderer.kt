@@ -33,16 +33,17 @@ internal object WidgetRenderer {
             }
     }
 
-    suspend fun renderAll(context: Context, refreshing: Boolean = false) = withContext(Dispatchers.IO) {
+    suspend fun renderAll(context: Context) = withContext(Dispatchers.IO) {
         renderMutex.withLock {
             val now = System.currentTimeMillis()
             val state = WidgetScheduleStore(context).state(now)
+            val refreshStatus = WidgetRefreshService.status(context)
             val manager = AppWidgetManager.getInstance(context)
             ids(context).forEach { (id, wide) ->
                 val options = manager.getAppWidgetOptions(id)
                 val largeFont = context.resources.configuration.fontScale > 1.3f
                 val views = responsiveWidgetViews(options, wide) { width, height ->
-                    create(context, id, wide, state, now, height, largeFont, refreshing, width)
+                    create(context, id, wide, state, now, height, largeFont, refreshStatus, width)
                 }
                 manager.updateAppWidget(id, views)
             }
@@ -51,7 +52,7 @@ internal object WidgetRenderer {
 
     internal fun create(
         context: Context, id: Int, wide: Boolean, state: WidgetScheduleState, now: Long,
-        height: Int = 180, largeFont: Boolean = false, refreshing: Boolean = false,
+        height: Int = 180, largeFont: Boolean = false, refreshStatus: WidgetRefreshStatus = WidgetRefreshStatus.IDLE,
         width: Int = if (wide) 340 else 170,
     ): RemoteViews {
         val contentHeight = if (wide) height else minOf(width, height)
@@ -74,6 +75,7 @@ internal object WidgetRenderer {
         views.setOnClickPendingIntent(R.id.widget_open, WidgetIntents.open(context, id))
         views.setOnClickPendingIntent(R.id.widget_refresh, WidgetIntents.refresh(context, id))
         views.setViewVisibility(R.id.widget_open, if (largeFont) View.GONE else View.VISIBLE)
+        val refreshing = refreshStatus == WidgetRefreshStatus.RUNNING
         views.setContentDescription(R.id.widget_refresh, if (refreshing) "正在刷新赛程" else "刷新赛程")
         val updated = if (state.updatedAt > 0) {
             SimpleDateFormat(if (now - state.updatedAt > DAY) "MM-dd HH:mm" else "HH:mm", Locale.ROOT)
@@ -83,22 +85,18 @@ internal object WidgetRenderer {
         val online = network.getNetworkCapabilities(network.activeNetwork)
             ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
         val stale = state.failed || !online || state.updatedAt > 0 && now - state.updatedAt >= 30 * 60_000L
-        val footer = when {
-            refreshing -> "正在刷新"
-            !online && updated.isEmpty() -> "联网后自动更新"
-            state.failed && updated.isEmpty() -> "刷新失败 · 点击重试"
-            stale -> "缓存 $updated"
-            updated.isNotEmpty() -> "$updated 更新"
-            else -> "已订阅赛事"
-        }
+        val footer = widgetFooterText(refreshStatus, state.failed, online, stale, updated,
+            sportLabel = if (wide) null else state.matches.firstOrNull()?.sportLabel)
         views.setTextViewText(R.id.widget_footer, footer)
-        views.setContentDescription(R.id.widget_footer, if (stale) "显示上次获取的赛程，更新时间 $updated，可点击刷新获取最新数据" else footer)
+        views.setContentDescription(R.id.widget_footer, if (stale) "$footer，显示上次获取的赛程，更新时间 $updated" else footer)
         val empty = state.matches.isEmpty()
         views.setViewVisibility(R.id.widget_empty, if (empty) View.VISIBLE else View.GONE)
         views.setTextViewText(R.id.widget_empty, when {
             !online && !state.hasFetched -> if (contentHeight < 135) "等待联网" else "等待网络连接"
-            refreshing || !state.hasFetched -> if (contentHeight < 135) "加载中" else "正在加载赛程"
-            state.failed -> if (contentHeight < 135) "获取失败" else "暂时无法获取赛程"
+            refreshing -> if (contentHeight < 135) "加载中" else "正在加载赛程"
+            refreshStatus == WidgetRefreshStatus.WAITING -> "等待刷新赛程"
+            refreshStatus == WidgetRefreshStatus.FAILED || state.failed -> if (contentHeight < 135) "获取失败" else "暂时无法获取赛程"
+            !state.hasFetched -> if (contentHeight < 135) "加载中" else "正在加载赛程"
             else -> if (contentHeight < 135) "暂无比赛" else "近期暂无比赛"
         })
         views.setInt(R.id.widget_empty, "setMaxLines", 3)
@@ -141,8 +139,6 @@ internal object WidgetRenderer {
             views.setViewVisibility(R.id.widget_status, if (empty) View.INVISIBLE else View.VISIBLE)
             views.setViewVisibility(R.id.widget_competition, if (empty || contentHeight < 155 || largeFont) View.GONE else View.VISIBLE)
             state.matches.firstOrNull()?.let { match ->
-                views.setTextViewText(R.id.widget_footer, match.sportLabel)
-                views.setContentDescription(R.id.widget_footer, "赛事类型 ${match.sportLabel}")
                 views.setTextViewText(R.id.widget_status, if (match.live) "● ${match.status}" else if (match.terminal) match.status else "${SimpleDateFormat("MM-dd HH:mm", Locale.ROOT).format(Date(match.startsAt))}")
                 views.textColor(context, R.id.widget_status, if (match.live) R.color.widget_accent else R.color.widget_secondary)
                 views.setTextViewText(R.id.widget_competition, match.competition.ifBlank { match.name })

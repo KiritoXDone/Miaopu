@@ -42,7 +42,7 @@ class WidgetRefreshService : JobService() {
             var completed = false
             var failed = false
             try {
-                WidgetRenderer.renderAll(this@WidgetRefreshService, refreshing = true)
+                WidgetRenderer.renderAll(this@WidgetRefreshService)
                 val subscriptions = EsportSubscriptionStore(this@WidgetRefreshService).subscriptions()
                 val store = WidgetScheduleStore(this@WidgetRefreshService)
                 val concurrency = Semaphore(3)

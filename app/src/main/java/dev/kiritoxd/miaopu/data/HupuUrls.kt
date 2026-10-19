@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets
 object HupuUrls {
     const val SCHEDULE_BASE = "https://match-api.hupu.com"
     const val SCORE_BASE = "https://games.mobileapi.hupu.com/1/8.2.99"
+    const val COMMENT_LIGHT_BASE = "https://games.mobileapi.hupu.com/9/8.0.99"
     const val DETAIL_BASE = "https://offline-download.hupu.com/online/prod/310016/detail.html"
     private const val PASSPORT_BASE = "https://passport.hupu.com/v2/login"
 

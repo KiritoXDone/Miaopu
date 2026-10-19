@@ -261,14 +261,22 @@ class HupuAdapter(
         writeCommentAction("publish", CommentWritePayloads.reply(target, parentId, content))
 
     suspend fun setCommentLight(comment: HupuComment, light: Boolean): AdapterResult<Unit> =
-        writeCommentAction(if (light) "light" else "cancelLight", CommentWritePayloads.light(comment.id, comment.subjectId))
+        writeCommentAction(
+            if (light) "light" else "cancelLight",
+            CommentWritePayloads.light(comment.id, comment.subjectId),
+            HupuUrls.COMMENT_LIGHT_BASE,
+        )
 
-    private suspend fun writeCommentAction(action: String, body: String): AdapterResult<Unit> {
+    private suspend fun writeCommentAction(
+        action: String,
+        body: String,
+        baseUrl: String = "https://games.mobileapi.hupu.com/1/8.2.58",
+    ): AdapterResult<Unit> {
         val source = "hupu.comment.$action"
         if (!cookieSession.isAuthenticated()) return AdapterResult.failure(
             source, AdapterStatus.AUTH_REQUIRED, "请先登录虎扑", false,
         )
-        val response = request("https://games.mobileapi.hupu.com/1/8.2.58/bplcommentapi/bpl/comment/$action", "POST", body)
+        val response = request("$baseUrl/bplcommentapi/bpl/comment/$action", "POST", body)
         return withContext(Dispatchers.Default) { response.toAdapterResult(source, ::parseWriteResponse) }
     }
 

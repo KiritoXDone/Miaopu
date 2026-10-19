@@ -17,16 +17,16 @@ class ScheduleWidgetProvider : BaseScheduleWidgetProvider()
 open class BaseScheduleWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == WidgetIntents.REFRESH) {
+            WidgetRefreshService.enqueue(context, manual = true)
             render(context)
-            WidgetRefreshService.enqueue(context)
         } else {
             super.onReceive(context, intent)
         }
     }
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
-        render(context)
         WidgetRefreshService.enqueue(context)
+        render(context)
     }
 
     override fun onAppWidgetOptionsChanged(context: Context, manager: AppWidgetManager, id: Int, options: Bundle) {

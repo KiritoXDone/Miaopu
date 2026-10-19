@@ -27,7 +27,9 @@ internal object WidgetIntents {
     fun refresh(context: Context, widgetId: Int): PendingIntent {
         val intent = Intent(context, MatchWidgetProvider::class.java).apply {
             action = REFRESH
-            data = Uri.parse("miaopu://widget/refresh/$widgetId")
+            addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+            // UPDATE_CURRENT only replaces extras; use a new identity for the foreground flag.
+            data = Uri.parse("miaopu://widget/manual-refresh/$widgetId")
         }
         return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }

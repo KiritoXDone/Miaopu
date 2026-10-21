@@ -86,7 +86,9 @@ internal fun DetailTabs(
                     if (active) colors.onSurface else colors.onSurfaceVariantSummary,
                     tween(TabMotionDurationMillis, easing = TabMotionEasing), label = "detailTabText")
                 Row(Modifier.weight(1f).heightIn(min = 48.dp).clip(RoundedCornerShape(12.dp))
-                    .selectable(active, role = Role.Tab, onClick = { if (!active) onSelect(index) })
+                    // The shared indicator owns feedback; per-tab press overlays linger during rapid switches.
+                    .selectable(active, interactionSource = null, indication = null,
+                        role = Role.Tab, onClick = { if (!active) onSelect(index) })
                     .padding(horizontal = 8.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                     logos.getOrNull(index)?.let { logo ->

@@ -46,6 +46,14 @@ jobs:
             exit 1
           fi
 
+      - name: Extract release notes from changelog
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s scripts/tests -v
+          python3 scripts/release_notes.py "$RELEASE_TAG" > "$RUNNER_TEMP/miaopu-release-notes.md"
+
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
@@ -136,17 +144,14 @@ jobs:
           set -euo pipefail
           apk="dist/Miaopu-$RELEASE_TAG.apk"
           checksum="$apk.sha256"
+          notes_file="$RUNNER_TEMP/miaopu-release-notes.md"
+          test -s "$notes_file"
 
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "$apk" "$checksum" --clobber
           else
-            notes_file="docs/releases/$RELEASE_TAG.md"
-            notes_args=(--generate-notes)
-            if [[ -s "$notes_file" ]]; then
-              notes_args=(--notes-file "$notes_file")
-            fi
             gh release create "$RELEASE_TAG" "$apk" "$checksum" \
               --verify-tag \
-              "${notes_args[@]}" \
+              --notes-file "$notes_file" \
               --title "Miaopu $RELEASE_TAG"
           fi

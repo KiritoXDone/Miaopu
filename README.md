@@ -96,6 +96,14 @@ cd Miaopu
 
 测试版 APK 位于 `app/build/outputs/apk/debug/app-debug.apk`，应用名称为“喵扑测试版”，可与正式版共存。
 
+## 发布版本
+
+发布前更新 `app/build.gradle.kts` 的版本号，并在根目录 [changelog.md](changelog.md) 顶部添加 `## <版本号>` 段落及本次更新说明。版本标题必须与 Git 标签、`versionName` 完全一致，例如 `## 2.3.5`。
+
+推送版本标签后，Release workflow 会提取该版本段落，构建并签名 APK，再一次性创建包含说明、APK 和 SHA-256 校验文件的 Release。缺少对应段落、重复版本或空说明会在构建前报错；发布说明只包含当前版本，不包含其他版本记录。
+
+可在本地预览提取结果：`python3 scripts/release_notes.py 2.3.5`。
+
 ## 致谢
 
 感谢虎扑及其社区用户提供的赛事内容与讨论，以及 Miuix、Jetpack Compose、Coil 等开源项目。

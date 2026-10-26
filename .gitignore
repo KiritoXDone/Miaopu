@@ -8,3 +8,4 @@ local.properties
 outputs/
 work/
 .DS_Store
+__pycache__/

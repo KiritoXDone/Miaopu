@@ -59,10 +59,10 @@ import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
+import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.NavigationBar
-import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -322,20 +322,20 @@ private fun MainNavigationBar(
     selected: MainSection,
     onSelect: (MainSection) -> Unit,
 ) {
-    NavigationBar(showDivider = false) {
-        NavigationBarItem(
+    FloatingNavigationBar {
+        FloatingNavigationBarItem(
             selected = selected == MainSection.HOME,
             onClick = { onSelect(MainSection.HOME) },
             icon = LucideIcons.House,
             label = "首页",
         )
-        NavigationBarItem(
+        FloatingNavigationBarItem(
             selected = selected == MainSection.EVENTS,
             onClick = { onSelect(MainSection.EVENTS) },
             icon = LucideIcons.CalendarDays,
             label = "赛事",
         )
-        NavigationBarItem(
+        FloatingNavigationBarItem(
             selected = selected == MainSection.PROFILE,
             onClick = { onSelect(MainSection.PROFILE) },
             icon = LucideIcons.CircleUserRound,

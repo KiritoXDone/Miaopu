@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import dev.kiritoxd.miaopu.BuildConfig
 import dev.kiritoxd.miaopu.data.AdapterResult
 import dev.kiritoxd.miaopu.data.AdapterStatus
+import dev.kiritoxd.miaopu.data.AppSettingsStore
 import dev.kiritoxd.miaopu.data.CommentPage
 import dev.kiritoxd.miaopu.data.Esport
 import dev.kiritoxd.miaopu.data.EsportCatalog
@@ -69,6 +70,7 @@ class MiaopuViewModel(
     internal val commentReplies = CommentRepliesController(viewModelScope, adapter)
     internal val commentActions = CommentActionsController(viewModelScope, adapter::setCommentLight, adapter::publishReply) { message = it }
     private val subscriptionStore = EsportSubscriptionStore(application)
+    private val appSettingsStore = AppSettingsStore(application)
     private val initialSubscriptions = subscriptionStore.orderedSubscriptions()
     private var navigator: MiaopuNavigator? = null
     private var pendingWidgetDestination: Pair<MatchSummary?, Esport?>? = null
@@ -85,6 +87,8 @@ class MiaopuViewModel(
     private val scheduleRefreshFeedback = ScheduleRefreshFeedback { refreshMessageEvents.tryEmit(it) }
 
     internal val screen: AppScreen get() = navigator?.currentScreen ?: AppScreen.Schedule
+    var floatingNavigationBarEnabled: Boolean by mutableStateOf(appSettingsStore.floatingNavigationBarEnabled())
+        private set
     var subscribedEsports: List<Esport> by mutableStateOf(initialSubscriptions)
         private set
     var selectedEsport: Esport by mutableStateOf(subscriptionStore.selected(initialSubscriptions))
@@ -211,6 +215,11 @@ class MiaopuViewModel(
     fun selectMainSection(section: MainSection) {
         selectedMainSection = section
         savedStateHandle[SELECTED_MAIN_SECTION_KEY] = section.name
+    }
+
+    fun updateFloatingNavigationBar(enabled: Boolean) {
+        floatingNavigationBarEnabled = enabled
+        appSettingsStore.saveFloatingNavigationBarEnabled(enabled)
     }
 
     fun retry() {

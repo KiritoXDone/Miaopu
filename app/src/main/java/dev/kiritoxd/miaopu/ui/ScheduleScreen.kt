@@ -59,8 +59,6 @@ import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -128,6 +126,7 @@ fun ScheduleScreen(viewModel: MiaopuViewModel) {
         bottomBar = {
             MainNavigationBar(
                 selected = visibleSection,
+                floating = viewModel.floatingNavigationBarEnabled,
                 onSelect = selectSection,
             )
         },
@@ -314,33 +313,6 @@ private fun EventsSectionContent(
                 searchQuery = searchQuery,
             )
         }
-    }
-}
-
-@Composable
-private fun MainNavigationBar(
-    selected: MainSection,
-    onSelect: (MainSection) -> Unit,
-) {
-    FloatingNavigationBar {
-        FloatingNavigationBarItem(
-            selected = selected == MainSection.HOME,
-            onClick = { onSelect(MainSection.HOME) },
-            icon = LucideIcons.House,
-            label = "首页",
-        )
-        FloatingNavigationBarItem(
-            selected = selected == MainSection.EVENTS,
-            onClick = { onSelect(MainSection.EVENTS) },
-            icon = LucideIcons.CalendarDays,
-            label = "赛事",
-        )
-        FloatingNavigationBarItem(
-            selected = selected == MainSection.PROFILE,
-            onClick = { onSelect(MainSection.PROFILE) },
-            icon = LucideIcons.CircleUserRound,
-            label = "我的",
-        )
     }
 }
 
@@ -674,6 +646,12 @@ private fun ProfileContent(viewModel: MiaopuViewModel, innerPadding: PaddingValu
             }
         }
         item { SectionHeading("应用") }
+        item {
+            AppearanceSettingsCard(
+                floatingNavigationBarEnabled = viewModel.floatingNavigationBarEnabled,
+                onFloatingNavigationBarChange = viewModel::updateFloatingNavigationBar,
+            )
+        }
         item {
             val updateState = viewModel.updateCheckState
             val summary = when (updateState) {

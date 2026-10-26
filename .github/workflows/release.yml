@@ -140,8 +140,13 @@ jobs:
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "$apk" "$checksum" --clobber
           else
+            notes_file="docs/releases/$RELEASE_TAG.md"
+            notes_args=(--generate-notes)
+            if [[ -s "$notes_file" ]]; then
+              notes_args=(--notes-file "$notes_file")
+            fi
             gh release create "$RELEASE_TAG" "$apk" "$checksum" \
               --verify-tag \
-              --generate-notes \
+              "${notes_args[@]}" \
               --title "Miaopu $RELEASE_TAG"
           fi

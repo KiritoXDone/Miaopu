@@ -24,10 +24,9 @@ internal fun EventsPageContent(
 ) {
     val bottomPadding = innerPadding.calculateBottomPadding()
     val state = viewModel.scheduleStateFor(esport)
-    val incoming = (state as? LoadState.Ready)?.value
-    var displayed by remember(esport) { mutableStateOf(viewModel.cachedScheduleFor(esport)) }
-    val schedule = displayed ?: incoming
-    SideEffect { if (displayed == null && incoming != null) displayed = incoming }
+    val latestSchedule = (state as? LoadState.Ready)?.value ?: viewModel.cachedScheduleFor(esport)
+    // Equal refreshes must keep the identity used by the asynchronous search result.
+    val schedule = remember(esport, latestSchedule) { latestSchedule }
     val retry = { viewModel.refreshScheduleFor(esport) }
     Box(Modifier.fillMaxSize()) {
         if (schedule == null) {
@@ -56,8 +55,6 @@ internal fun EventsPageContent(
                     state is LoadState.Failed -> if (state.retryable) {
                         TextButton("刷新失败，点击重试", onClick = retry)
                     } else Text("刷新失败，保留原赛程")
-                    incoming != null && incoming != displayed ->
-                        TextButton("赛程已更新，点击查看", onClick = { displayed = incoming })
                 }
             }
         }

@@ -31,6 +31,9 @@ import dev.kiritoxd.miaopu.widget.WidgetUpdates
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
@@ -74,6 +77,12 @@ class MiaopuViewModel(
     private val stageViewports = mutableMapOf<String, StageViewportSnapshot>()
     private val publishCommentGate = TargetRequestGate()
     private val commentPaginationGate = TargetRequestGate()
+    private val refreshMessageEvents = MutableSharedFlow<String>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    internal val refreshMessages = refreshMessageEvents.asSharedFlow()
+    private val scheduleRefreshFeedback = ScheduleRefreshFeedback { refreshMessageEvents.tryEmit(it) }
 
     internal val screen: AppScreen get() = navigator?.currentScreen ?: AppScreen.Schedule
     var subscribedEsports: List<Esport> by mutableStateOf(initialSubscriptions)
@@ -223,12 +232,17 @@ class MiaopuViewModel(
 
     internal fun refreshScheduleFor(esport: Esport) {
         adapter.invalidateSharedScheduleCache()
-        loadSchedule(esport = esport, force = true)
+        val report = scheduleRefreshFeedback.begin(listOf(esport))
+        loadSchedule(esport = esport, force = true, onComplete = { report(esport, it is LoadState.Ready) })
     }
 
     fun refreshHomeSchedules() {
         adapter.invalidateSharedScheduleCache()
-        loadSubscribedSchedules(force = true)
+        val esports = subscribedEsports.toList()
+        val report = scheduleRefreshFeedback.begin(esports)
+        esports.forEach { esport ->
+            loadSchedule(esport = esport, force = true, onComplete = { report(esport, it is LoadState.Ready) })
+        }
     }
 
     fun checkForUpdates() {
@@ -490,7 +504,11 @@ class MiaopuViewModel(
         subscribedEsports.forEach { esport -> loadSchedule(esport = esport, force = force) }
     }
 
-    private fun loadSchedule(esport: Esport = selectedEsport, force: Boolean = false) {
+    private fun loadSchedule(
+        esport: Esport = selectedEsport,
+        force: Boolean = false,
+        onComplete: ((LoadState<Schedule>) -> Unit)? = null,
+    ) {
         if (!force) schedules[esport]?.let {
             updateScheduleState(esport, LoadState.Ready(it))
             return
@@ -505,6 +523,7 @@ class MiaopuViewModel(
             (nextState as? LoadState.Ready)?.value?.let { schedules[esport] = it }
             updateScheduleState(esport, nextState)
             scheduleJobs.remove(esport)
+            onComplete?.invoke(nextState)
             WidgetUpdates.publish(getApplication(), esport, (nextState as? LoadState.Ready)?.value, startedAt)
         }
         scheduleJobs[esport] = scheduleJob

@@ -1,5 +1,6 @@
 package dev.kiritoxd.miaopu.ui
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -12,10 +13,15 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
@@ -28,6 +34,21 @@ import top.yukonga.miuix.kmp.theme.ThemeController
 
 @Composable
 fun MiaopuApp(viewModel: MiaopuViewModel) {
+    val context = LocalContext.current.applicationContext
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(viewModel, context, lifecycle) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            var toast: Toast? = null
+            try {
+                viewModel.refreshMessages.collect { message ->
+                    toast?.cancel()
+                    toast = Toast.makeText(context, message, Toast.LENGTH_SHORT).also { it.show() }
+                }
+            } finally {
+                toast?.cancel()
+            }
+        }
+    }
     val backStack = rememberNavBackStack<AppScreen>(AppScreen.Schedule)
     val navigator = remember(backStack) { MiaopuNavigator(backStack) }
     DisposableEffect(viewModel, navigator) {

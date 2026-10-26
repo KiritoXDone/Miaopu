@@ -65,7 +65,6 @@ import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
@@ -172,10 +171,13 @@ private fun HomeSectionContent(
 ) {
     val states = subscriptions.map(viewModel::scheduleStateFor)
     val loading = states.any { it is LoadState.Loading }
-    val readySchedules = states.mapNotNull { state -> (state as? LoadState.Ready)?.value }
+    // A failed refresh must not remove a subscribed sport's previously loaded matches.
+    val availableSchedules = subscriptions.mapIndexedNotNull { index, esport ->
+        (states[index] as? LoadState.Ready)?.value ?: viewModel.cachedScheduleFor(esport)
+    }
     val failedStates = states.filterIsInstance<LoadState.Failed>()
     // Canonicalize equal snapshots so an equal refresh cannot invalidate a completed merge.
-    val mergeSources = remember(readySchedules) { readySchedules }
+    val mergeSources = remember(availableSchedules) { availableSchedules }
     var displayedSchedule by remember(subscriptions) { mutableStateOf<Schedule?>(null) }
     val mergeResult by produceState<HomeScheduleMerge?>(null, subscriptions, mergeSources, loading) {
         if (loading) return@produceState
@@ -188,14 +190,12 @@ private fun HomeSectionContent(
     val mergedSchedule = mergeResult?.takeIf { result ->
         !loading && result.sources === mergeSources
     }?.schedule
-    // Once reading starts, a network completion must not replace the visible timeline.
+    // Publish completed refreshes automatically, keeping the previous timeline while loading.
     LaunchedEffect(loading, mergedSchedule, subscriptions) {
-        if (mergedSchedule != null && displayedSchedule == null && readySchedules.isNotEmpty()) {
+        if (mergedSchedule != null && availableSchedules.isNotEmpty()) {
             displayedSchedule = mergedSchedule
         }
     }
-    val pendingUpdate = mergedSchedule != null && readySchedules.isNotEmpty() &&
-        displayedSchedule != null && displayedSchedule !== mergedSchedule
     val bottomPadding = innerPadding.calculateBottomPadding()
 
     Column(
@@ -207,7 +207,7 @@ private fun HomeSectionContent(
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             when {
                 displayedSchedule != null -> HomeContent(viewModel, checkNotNull(displayedSchedule), bottomPadding)
-                (loading || (mergedSchedule == null && readySchedules.isNotEmpty())) -> LoadingPane(
+                (loading || (mergedSchedule == null && availableSchedules.isNotEmpty())) -> LoadingPane(
                     label = "正在合并已订阅赛事",
                     modifier = Modifier.fillMaxSize().padding(bottom = bottomPadding),
                 )
@@ -219,10 +219,6 @@ private fun HomeSectionContent(
                 )
                 mergedSchedule != null -> HomeContent(viewModel, mergedSchedule, bottomPadding)
                 else -> LoadingPane("正在合并已订阅赛事", Modifier.fillMaxSize())
-            }
-            if (pendingUpdate) {
-                TextButton("赛程已更新，点击查看", onClick = { displayedSchedule = mergedSchedule },
-                    modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
             }
         }
     }

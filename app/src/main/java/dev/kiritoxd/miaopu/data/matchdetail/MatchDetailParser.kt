@@ -34,12 +34,18 @@ internal object MatchDetailParser {
         val data = root.optJSONObject("data") ?: return MatchAllScores(emptyList())
         val info = data.optJSONObject("matchInfo")
         val teams = data.optJSONArray("teamScoreInfo")?.objects().orEmpty()
-        return MatchAllScores(teams.sortedBy { if (it.optBoolean("home")) 0 else 1 }.mapIndexed { index, team ->
+        // Keep the API's team order; home only selects the matching name/logo.
+        return MatchAllScores(teams.mapIndexed { index, team ->
             val side = if (team.has("home")) { if (team.optBoolean("home")) 1 else 2 } else index + 1
             val players = team.optJSONArray("playerInfo")?.objects().orEmpty().mapNotNull { player ->
                 val name = player.text("playerName") ?: return@mapNotNull null
                 val score = player.text("playerScore")?.toDoubleOrNull()?.takeIf { it.isFinite() && it > 0 && it <= 10 }
-                PlayerAllScore(name, score?.let { String.format(java.util.Locale.ROOT, "%.1f", it) } ?: "—", null, null)
+                PlayerAllScore(name, score?.let { String.format(java.util.Locale.ROOT, "%.1f", it) } ?: "—", null, null,
+                    position = PlayerPosition.entries.firstOrNull { it.name == player.text("playerLocation") },
+                    isSubstitute = player.optBoolean("isSubstitution"))
+            }.sortedBy { player ->
+                // Stable ties preserve API order. Keep substitutes/unknown positions after the starting lanes.
+                if (player.isSubstitute) Int.MAX_VALUE else player.position?.ordinal ?: Int.MAX_VALUE
             }
             ScoredTeam(info?.text("team${side}_name").orEmpty(), info?.text("team${side}_logo"), players)
         })

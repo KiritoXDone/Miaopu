@@ -87,25 +87,99 @@ class MatchDetailParserTest {
         assertTrue(MatchDetailParser.allScores(fixture("scores")).hasScores)
     }
 
-    @Test fun lolSummaryUsesHomeAwayTeamsAndActualPlayerScores() {
+    @Test fun lolSummaryPreservesApiTeamOrderAndUsesPlayerLocations() {
         val data = MatchDetailParser.playerScores(fixture("lol-scores"))
         assertTrue(data.hasScores)
         assertEquals(listOf("IG", "JDG"), data.teams.map { it.name })
         assertEquals(listOf(5, 5), data.teams.map { it.players.size })
+        assertEquals(listOf("TheShy", "Wei", "Rookie", "JiaQi", "Meiko"), data.teams[0].players.map { it.name })
+        assertEquals(listOf("Xiaoxu", "JunJia", "HongQ", "GALA", "Vampire"), data.teams[1].players.map { it.name })
+        data.teams.forEach { team -> assertEquals(PlayerPosition.entries, team.players.map { it.position }) }
         assertEquals("9.7", data.teams.first().players.single { it.name == "Rookie" }.score)
         val root = JSONObject(fixture("lol-scores"))
         val teams = root.getJSONObject("data").getJSONArray("teamScoreInfo")
         val first = teams.getJSONObject(0)
         teams.put(0, teams.getJSONObject(1))
         teams.put(1, first)
-        assertEquals(listOf("IG", "JDG"), MatchDetailParser.playerScores(root.toString()).teams.map { it.name })
+        val reversed = MatchDetailParser.playerScores(root.toString())
+        assertEquals(listOf("JDG", "IG"), reversed.teams.map { it.name })
+        assertEquals(data.teams.reversed(), reversed.teams)
     }
 
-    @Test fun kogSummaryRetainsSubstitutesAndMissingDataStaysHidden() {
+    @Test fun lolSummaryKeepsLocationTiesAndAppendsSubstitutesAndUnknownLocationsStably() {
+        val body = """{"code":1,"data":{"teamScoreInfo":[{"playerInfo":[
+            {"playerName":"SubTop","playerLocation":"TOP","isSubstitution":true},
+            {"playerName":"Unknown","playerLocation":"FUTURE"},
+            {"playerName":"MidA","playerLocation":"MID"},
+            {"playerName":"Support","playerLocation":"SUP"},
+            {"playerName":"Jungle","playerLocation":"JUN"},
+            {"playerName":"Top","playerLocation":"TOP"},
+            {"playerName":"MidB","playerLocation":"MID"},
+            {"playerName":"Bottom","playerLocation":"BOT"},
+            {"playerName":"Missing"},
+            {"playerName":"SubJungle","playerLocation":"JUN","isSubstitution":true}
+        ]}]}}"""
+        val players = MatchDetailParser.playerScores(body).teams.single().players
+        assertEquals(listOf("Top", "Jungle", "MidA", "MidB", "Bottom", "Support",
+            "SubTop", "Unknown", "Missing", "SubJungle"), players.map { it.name })
+        assertEquals(listOf("SubTop", "SubJungle"), players.filter { it.isSubstitute }.map { it.name })
+        assertEquals(PlayerPosition.TOP, players.single { it.name == "SubTop" }.position)
+        assertNull(players.single { it.name == "Unknown" }.position)
+        assertNull(players.single { it.name == "Missing" }.position)
+    }
+
+    @Test fun lolSummaryWithoutKnownLocationsKeepsResponseOrder() {
+        val body = """{"code":1,"data":{"teamScoreInfo":[{"playerInfo":[
+            {"playerName":"Zed","playerLocation":null,"isSubstitution":true},
+            {"playerName":"Alpha","playerLocation":""},
+            {"playerName":"Future","playerLocation":"FUTURE"},
+            {"playerName":"Missing"}
+        ]}]}}"""
+        val players = MatchDetailParser.playerScores(body).teams.single().players
+        assertEquals(listOf("Zed", "Alpha", "Future", "Missing"), players.map { it.name })
+    }
+
+    @Test fun commonSummaryPreservesNestedRosterOrderIncludingSubstitutes() {
+        val body = """{"success":true,"result":{
+            "memberBasicInfos":[{"memberName":"Away"},{"memberName":"Home"}],
+            "memberScoreInfos":[
+                [[{"memberName":"Zed","memberAllAvgScore":"3.0"},
+                  {"memberName":"Sub","memberAllAvgScore":"9.0"}],
+                 [{"memberName":"Alpha","memberAllAvgScore":"7.0"}]],
+                [[{"memberName":"Other","memberAllAvgScore":"8.0"}]]
+            ]
+        }}"""
+        val data = MatchDetailParser.allScores(body)
+        assertEquals(listOf("Away", "Home"), data.teams.map { it.name })
+        assertEquals(listOf("Zed", "Sub", "Alpha"), data.teams[0].players.map { it.name })
+        assertEquals(listOf("3.0", "9.0", "7.0"), data.teams[0].players.map { it.score })
+        assertEquals(listOf("Other"), data.teams[1].players.map { it.name })
+    }
+
+    @Test fun playerSummaryWithoutHomeFlagUsesResponseOrderForTeamMetadata() {
+        val root = JSONObject(fixture("lol-scores"))
+        val teams = root.getJSONObject("data").getJSONArray("teamScoreInfo")
+        for (index in 0 until teams.length()) teams.getJSONObject(index).remove("home")
+        val data = MatchDetailParser.playerScores(root.toString())
+        assertEquals(listOf("IG", "JDG"), data.teams.map { it.name })
+        assertEquals(listOf("TheShy", "Xiaoxu"), data.teams.map { it.players.first().name })
+    }
+
+    @Test fun kogSummaryUsesPlayerLocationsAndRetainsSubstitutes() {
         val data = MatchDetailParser.playerScores(fixture("kog-scores"))
         assertEquals(listOf("马来西亚", "中国"), data.teams.map { it.name })
         assertEquals(listOf(6, 6), data.teams.map { it.players.size })
+        assertEquals(listOf("H.LEE", "T.CHEN", "C.LIM", "R.NA", "H.CHONG", "N.NG"), data.teams[0].players.map { it.name })
+        assertEquals(listOf("王科", "何伟嘉", "黄垚钦", "徐必成", "孟家俊", "赵昊宇"), data.teams[1].players.map { it.name })
+        data.teams.forEach { team ->
+            assertEquals(PlayerPosition.entries, team.players.take(5).map { it.position })
+            assertTrue(team.players.last().isSubstitute)
+            assertEquals(PlayerPosition.TOP, team.players.last().position)
+        }
         assertTrue(data.hasScores)
+    }
+
+    @Test fun playerSummaryMissingDataStaysHidden() {
         assertFalse(MatchDetailParser.playerScores("""{"code":1,"data":null}""").hasScores)
         assertFalse(MatchDetailParser.playerScores("""{"code":1,"data":{"teamScoreInfo":[]}}""").hasScores)
         val invalid = MatchAllScores(listOf(ScoredTeam("unknown", null,

@@ -112,7 +112,7 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
             }
             if (activePage == 0) {
                 val summary = visibleHeader.summary
-                if (summary?.hasScores == true) item(key = "summary") { AllMatchScoreCard(summary) }
+                if (summary?.hasScores == true) item(key = "summary") { AllMatchScoreCard(summary, match.esport) }
                 when (val state = viewModel.ratingState) {
                     LoadState.Loading -> item { DetailNotice("正在加载单局评分", loading = true) }
                     is LoadState.Failed -> item {

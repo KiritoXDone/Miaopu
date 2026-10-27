@@ -14,13 +14,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import dev.kiritoxd.miaopu.data.Esport
 import dev.kiritoxd.miaopu.data.matchdetail.*
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-internal fun AllMatchScoreCard(scores: MatchAllScores) {
+internal fun AllMatchScoreCard(scores: MatchAllScores, game: Esport) {
     if (!scores.hasScores) return
     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), cornerRadius = 18.dp,
         insideMargin = PaddingValues(12.dp)) {
@@ -31,13 +32,23 @@ internal fun AllMatchScoreCard(scores: MatchAllScores) {
                 pair.getOrNull(1)?.let { ScoreTeamHeading(it, true) }
             }
             repeat(pair.maxOf { it.players.size }) { index ->
+                val left = pair.first().players.getOrNull(index)
+                val right = pair.getOrNull(1)?.players?.getOrNull(index)
+                // A shared glyph must not imply matching lanes when rosters are incomplete or uneven.
+                val position = when {
+                    left == null -> right?.position
+                    right == null -> left.position
+                    else -> left.position?.takeIf { it == right.position }
+                }
                 if (index > 0) Box(Modifier.fillMaxWidth().height(0.5.dp)
                     .background(MiuixTheme.colorScheme.onSurface.copy(alpha = 0.06f)))
                 Row(Modifier.fillMaxWidth().heightIn(min = 32.dp), verticalAlignment = Alignment.CenterVertically) {
-                    ScorePlayer(pair.first().players.getOrNull(index), false, Modifier.weight(1f))
-                    Text("Ⅰ", modifier = Modifier.width(24.dp), textAlign = TextAlign.Center,
-                        fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-                    ScorePlayer(pair.getOrNull(1)?.players?.getOrNull(index), true, Modifier.weight(1f))
+                    ScorePlayer(left, false, Modifier.weight(1f))
+                    Box(Modifier.width(24.dp), contentAlignment = Alignment.Center) {
+                        if (position != null) PlayerPositionIcon(position, game)
+                        else Text("Ⅰ", fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                    }
+                    ScorePlayer(right, true, Modifier.weight(1f))
                 }
             }
         }

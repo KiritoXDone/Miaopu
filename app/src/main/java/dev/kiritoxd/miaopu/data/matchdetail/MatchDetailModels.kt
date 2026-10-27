@@ -15,4 +15,14 @@ data class MatchAllScores(val teams: List<ScoredTeam>) {
     val hasScores: Boolean get() = teams.any { team -> team.players.any { it.score.toDoubleOrNull()?.let { score -> score.isFinite() && score > 0 && score <= 10 } == true } }
 }
 data class ScoredTeam(val name: String, val logoUrl: String?, val players: List<PlayerAllScore>)
-data class PlayerAllScore(val name: String, val score: String, val dayColor: String?, val nightColor: String?)
+data class PlayerAllScore(
+    val name: String,
+    val score: String,
+    val dayColor: String?,
+    val nightColor: String?,
+    val position: PlayerPosition? = null,
+    val isSubstitute: Boolean = false,
+)
+
+/** LOL and KOG use these lane codes in the public player-score response. */
+enum class PlayerPosition { TOP, JUN, MID, BOT, SUP }

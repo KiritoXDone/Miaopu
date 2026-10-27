@@ -145,13 +145,12 @@ jobs:
           apk="dist/Miaopu-$RELEASE_TAG.apk"
           checksum="$apk.sha256"
           notes_file="$RUNNER_TEMP/miaopu-release-notes.md"
+          test -s "$apk"
+          test -s "$checksum"
           test -s "$notes_file"
 
-          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" "$apk" "$checksum" --clobber
-          else
-            gh release create "$RELEASE_TAG" "$apk" "$checksum" \
-              --verify-tag \
-              --notes-file "$notes_file" \
-              --title "Miaopu $RELEASE_TAG"
-          fi
+          # Publish notes and assets together; reruns must not modify an existing release.
+          gh release create "$RELEASE_TAG" "$apk" "$checksum" \
+            --verify-tag \
+            --notes-file "$notes_file" \
+            --title "Miaopu $RELEASE_TAG"

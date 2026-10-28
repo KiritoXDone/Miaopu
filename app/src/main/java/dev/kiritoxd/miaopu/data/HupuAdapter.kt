@@ -133,9 +133,7 @@ class HupuAdapter(
         val populatedGroupsDeferred = async {
             val groups = getAndParse(groupsEndpoint, "hupu.stage.groups.$type") {
                 HupuJsonParser.ratingGroups(it)
-            }.data.orEmpty().sortedWith(
-                compareBy<RatingGroup> { if (it.name == "趣评") 0 else 1 }.thenByDescending { it.sort },
-            )
+            }.data.orEmpty()
             groups.map { group ->
                 async groupTask@{
                     val endpoint = "${HupuUrls.SCORE_BASE}/bplcommentapi/bff/bpl/score_tree/groupAndSubNodes" +

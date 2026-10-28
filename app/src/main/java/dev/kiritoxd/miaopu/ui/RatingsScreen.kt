@@ -39,37 +39,29 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
     val stages = (viewModel.ratingState as? LoadState.Ready)?.value?.stages.orEmpty()
     val selectedStageIndex = if (stages.isEmpty()) 0 else stageIndex.coerceIn(stages.indices)
     val selectedStage = stages.getOrNull(selectedStageIndex)
-    var funSelected by rememberSaveable(match.uniqueKey, selectedStageIndex) { mutableStateOf(false) }
     val readyStage = (detail.stage as? LoadState.Ready)?.value
     val readyStats = (detail.statistics as? LoadState.Ready)?.value
     var previousStage by remember(match.uniqueKey) { mutableStateOf<StageRatingDetail?>(null) }
     var previousStats by remember(match.uniqueKey) { mutableStateOf<MatchStats?>(null) }
-    var hasFunTab by rememberSaveable(match.uniqueKey) { mutableStateOf(false) }
     SideEffect {
-        if (readyStage != null) {
-            previousStage = readyStage
-            if (readyStage.groups.any { it.name == "趣评" && it.targets.isNotEmpty() }) hasFunTab = true
-        }
+        if (readyStage != null) previousStage = readyStage
         if (readyStats != null) previousStats = readyStats
     }
     val stageDetail = readyStage ?: previousStage
     val statsDetail = readyStats ?: previousStats
-    val funGroup = stageDetail?.groups?.firstOrNull { it.name == "趣评" && it.targets.isNotEmpty() }
-    val showFunTab = hasFunTab || funGroup != null
     val stagePending = readyStage == null
     val statsPending = readyStats == null
-    var groupIndex by rememberSaveable(match.uniqueKey, selectedStage?.outBizNo, stageIndex) { mutableIntStateOf(0) }
-    val groups = remember(stageDetail, match.teams) {
-        stageDetail?.groups.orEmpty().filter { it.name != "趣评" && it.targets.isNotEmpty() }
-            .sortedBy { group -> match.teams.indexOfFirst { it.name == group.name }.takeIf { it >= 0 } ?: Int.MAX_VALUE }
+    var groupIndex by rememberSaveable(match.uniqueKey, selectedStage?.outBizType, selectedStage?.outBizNo, selectedStageIndex) { mutableIntStateOf(0) }
+    val groups = remember(stageDetail) {
+        // Team and fun-rating groups are siblings under the selected stage, in API order.
+        stageDetail?.groups.orEmpty().filter { it.targets.isNotEmpty() }
     }
     val groupNames = remember(groups) { groups.map { it.name } }
     val selectedGroup = if (groups.isEmpty()) 0 else groupIndex.coerceIn(groups.indices)
-    val targets = if (funSelected) funGroup?.targets.orEmpty()
-        else groups.getOrNull(selectedGroup)?.targets ?: stageDetail?.targets.orEmpty()
+    val targets = groups.getOrNull(selectedGroup)?.targets ?: stageDetail?.targets.orEmpty()
     // Score/count updates refresh card values without moving cards under the reader's finger.
     val targetOrder = remember(match.uniqueKey, selectedStageIndex, selectedStage?.outBizType, selectedStage?.outBizNo,
-        funSelected, selectedGroup, targets.isEmpty(), stagePending) {
+        selectedGroup, targets.isEmpty(), stagePending) {
         orderRatingTargets(targets, StageTargetOrder.HOT)
             .map { it.outBizType to it.outBizNo }.distinct()
     }
@@ -123,16 +115,9 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
                             item { DetailNotice("这场比赛暂时没有可评分的选手") }
                         } else {
                             item(key = "stages") {
-                                val choices = stages.indices.map { it as Int? }.toMutableList()
-                                if (showFunTab) choices.add(minOf(1, choices.size), null)
-                                DetailTabs(choices.map { it?.let { index -> stages[index].name } ?: "趣评" },
-                                    if (funSelected && showFunTab) choices.indexOf(null) else choices.indexOf(selectedStageIndex)) { choice ->
-                                    val nextStage = choices[choice]
-                                    funSelected = nextStage == null
-                                    if (nextStage != null) {
-                                        stageIndex = nextStage
-                                        detail.loadStage(stages[nextStage])
-                                    }
+                                DetailTabs(stages.map { it.name }, selectedStageIndex) { nextStage ->
+                                    stageIndex = nextStage
+                                    detail.loadStage(stages[nextStage])
                                 }
                             }
                             if (stageDetail == null) {
@@ -140,7 +125,7 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
                                     selectedStage?.let { detail.loadStage(it, retry = true) }
                                 } }
                             } else {
-                                if (groups.isNotEmpty() && !funSelected) item(key = "teams") {
+                                if (groups.isNotEmpty()) item(key = "teams") {
                                     StableDetailSlot(stagePending, layout, "teams", notice = {
                                         StageLoadNotice(detail.stage) {
                                             selectedStage?.let { detail.loadStage(it, retry = true) }
@@ -149,7 +134,7 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
                                         DetailTabs(groupNames, selectedGroup, style = DetailTabStyle.TEAM, logos = groups.map { it.logoUrl }) { groupIndex = it }
                                     }
                                 }
-                                if (stagePending && (groups.isEmpty() || funSelected)) item(key = "stage-progress") {
+                                if (stagePending && groups.isEmpty()) item(key = "stage-progress") {
                                     StageLoadNotice(detail.stage) {
                                         selectedStage?.let { detail.loadStage(it, retry = true) }
                                     }

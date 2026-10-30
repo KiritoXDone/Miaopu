@@ -1,5 +1,6 @@
 package dev.kiritoxd.miaopu.data.matchdetail
 
+import dev.kiritoxd.miaopu.data.HupuUrls
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -24,7 +25,7 @@ internal object MatchDetailParser {
                 }
             }
             scores.optJSONArray(index)?.let(::collect)
-            ScoredTeam(basic?.text("memberName").orEmpty(), basic?.text("memberLogo"), players)
+            ScoredTeam(basic?.text("memberName").orEmpty(), HupuUrls.imageUrl(basic?.text("memberLogo")), players)
         })
     }
 
@@ -47,7 +48,7 @@ internal object MatchDetailParser {
                 // Stable ties preserve API order. Keep substitutes/unknown positions after the starting lanes.
                 if (player.isSubstitute) Int.MAX_VALUE else player.position?.ordinal ?: Int.MAX_VALUE
             }
-            ScoredTeam(info?.text("team${side}_name").orEmpty(), info?.text("team${side}_logo"), players)
+            ScoredTeam(info?.text("team${side}_name").orEmpty(), HupuUrls.imageUrl(info?.text("team${side}_logo")), players)
         })
     }
 
@@ -78,7 +79,7 @@ internal object MatchDetailParser {
                     StatsCell(cell?.text("showName") ?: "—", cell?.text("logo"))
                 }
             }
-            StatsTeam(columns.first().text("showName").orEmpty(), columns.first().text("logo"),
+            StatsTeam(columns.first().text("showName").orEmpty(), HupuUrls.imageUrl(columns.first().text("logo")),
                 scores[block.text("belongingCamp") ?: heading.text("memberPosition")],
                 columns.map { it.text("showName") ?: "—" }, players)
         }

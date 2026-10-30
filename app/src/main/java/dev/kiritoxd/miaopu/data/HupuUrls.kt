@@ -28,6 +28,18 @@ object HupuUrls {
         return "$PASSPORT_BASE?phone=1&jumpurl=$encoded&from=$encoded#/"
     }
 
+    /** Legacy NBA logos use HTTP even though this image CDN supports HTTPS. */
+    fun imageUrl(url: String?): String? {
+        if (url.isNullOrBlank()) return null
+        val uri = runCatching { URI(url) }.getOrNull() ?: return url
+        return if (uri.scheme.equals("http", ignoreCase = true) &&
+            uri.host.equals("i11.hoopchina.com.cn", ignoreCase = true) &&
+            uri.port == -1 && uri.rawUserInfo == null
+        ) {
+            "https:${url.substringAfter(':')}"
+        } else url
+    }
+
     fun isTrustedWebUrl(url: String?): Boolean {
         if (url.isNullOrBlank()) return false
         val uri = runCatching { URI(url) }.getOrNull() ?: return false

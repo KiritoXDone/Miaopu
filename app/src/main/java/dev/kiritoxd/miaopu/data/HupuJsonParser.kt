@@ -149,7 +149,7 @@ object HupuJsonParser {
                         name = group.stringOrNull("groupName") ?: group.stringOrNull("name") ?: "分组",
                         rootNodeId = rootNodeId,
                         sort = group.optInt("sort", index),
-                        logoUrl = group.attributeValue("logo"),
+                        logoUrl = HupuUrls.imageUrl(group.attributeValue("logo")),
                         teamId = group.attributeValue("teamId"),
                         childCount = group.optInt("childCount", 0),
                     ),
@@ -198,7 +198,7 @@ object HupuJsonParser {
                 val member = members.optJSONObject(index) ?: continue
                 val id = member.stringOrNull("memberId").orEmpty()
                 val name = member.stringOrNull("memberName")
-                val logoUrl = member.stringOrNull("memberLogo")
+                val logoUrl = HupuUrls.imageUrl(member.stringOrNull("memberLogo"))
                 val score = member.stringOrNull("memberBaseScore")
                 if (id.isBlank() && name.isNullOrBlank() && logoUrl.isNullOrBlank() && score.isNullOrBlank()) continue
                 add(
@@ -227,7 +227,7 @@ object HupuJsonParser {
                 outBizType = it.stringOrNull("scoreOutBizType"),
                 outBizNo = it.stringOrNull("scoreOutBizNo"),
                 jumpLink = it.stringOrNull("jumpLink"),
-                teamLogoUrl = it.stringOrNull("teamLogo"),
+                teamLogoUrl = HupuUrls.imageUrl(it.stringOrNull("teamLogo")),
             )
         }
         return MatchSummary(

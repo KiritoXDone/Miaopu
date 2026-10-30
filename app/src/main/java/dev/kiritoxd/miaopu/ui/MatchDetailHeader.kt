@@ -3,6 +3,7 @@ package dev.kiritoxd.miaopu.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withStyle
@@ -32,25 +33,30 @@ internal fun MatchHero(match: MatchSummary, liveScore: MatchLiveScore? = null) {
                 .filter(String::isNotBlank).joinToString(" · "), fontSize = 13.sp,
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary, maxLines = 2,
                 overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-            if (match.teams.size == 2) Row(Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-                HeroTeam(match.teams.getOrNull(0), Modifier.weight(1f))
-                Column(Modifier.weight(1.2f), horizontalAlignment = Alignment.CenterHorizontally) {
-                    liveScore?.currentMap?.let {
-                        Text(it, modifier = Modifier.background(MiuixTheme.colorScheme.onSurface.copy(alpha = 0.08f), RoundedCornerShape(5.dp))
-                            .padding(horizontal = 8.dp, vertical = 3.dp), fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (match.teams.size == 2) BoxWithConstraints(Modifier.fillMaxWidth()) {
+                // Measure the complete score first; reserve the other half for the two teams.
+                val scoreMaxWidth = maxWidth / 2
+                Row(Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                    HeroTeam(match.teams.getOrNull(0), Modifier.weight(1f))
+                    Column(Modifier.widthIn(max = scoreMaxWidth), horizontalAlignment = Alignment.CenterHorizontally) {
+                        liveScore?.currentMap?.let {
+                            Text(it, modifier = Modifier.background(MiuixTheme.colorScheme.onSurface.copy(alpha = 0.08f), RoundedCornerShape(5.dp))
+                                .padding(horizontal = 8.dp, vertical = 3.dp), fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                        Text(overallMatchScore(match) ?: "VS",
+                            autoSize = TextAutoSize.StepBased(minFontSize = 12.sp, maxFontSize = 36.sp, stepSize = 1.sp),
+                            fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 1, softWrap = false)
+                        liveScore?.currentScore?.let {
+                            Text(buildAnnotatedString {
+                                append("当前比分 ")
+                                withStyle(SpanStyle(color = MiuixTheme.colorScheme.primary, fontWeight = FontWeight.Bold)) { append(it) }
+                            }, fontSize = 12.sp, textAlign = TextAlign.Center,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                        }
                     }
-                    Text(overallMatchScore(match) ?: "VS", fontSize = 36.sp,
-                        fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 1)
-                    liveScore?.currentScore?.let {
-                        Text(buildAnnotatedString {
-                            append("当前比分 ")
-                            withStyle(SpanStyle(color = MiuixTheme.colorScheme.primary, fontWeight = FontWeight.Bold)) { append(it) }
-                        }, fontSize = 12.sp, textAlign = TextAlign.Center,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-                    }
+                    HeroTeam(match.teams.getOrNull(1), Modifier.weight(1f))
                 }
-                HeroTeam(match.teams.getOrNull(1), Modifier.weight(1f))
             } else {
                 Text(match.teams.joinToString(" · ") { it.name }.ifBlank { match.esport.title },
                     modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), fontSize = 20.sp,

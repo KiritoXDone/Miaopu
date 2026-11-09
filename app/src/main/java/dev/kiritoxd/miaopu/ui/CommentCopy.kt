@@ -2,7 +2,6 @@ package dev.kiritoxd.miaopu.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -28,9 +27,6 @@ internal fun commentCopyAction(content: String): (() -> Unit)? {
     return {
         context.getSystemService(ClipboardManager::class.java)
             .setPrimaryClip(ClipData.newPlainText("评论", content))
-        // Android 13 and newer provide their own clipboard confirmation.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            Toast.makeText(context, "评论已复制", Toast.LENGTH_SHORT).show()
-        }
+        Toast.makeText(context, "评论已复制", Toast.LENGTH_SHORT).show()
     }
 }

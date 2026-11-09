@@ -376,6 +376,7 @@ internal fun OfficialRatingTargetCard(target: RatingTarget, onClick: () -> Unit)
             Text(
                 text = "“$comment”",
                 modifier = Modifier.fillMaxWidth().background(HupuCommentBackground)
+                    .copyableComment(comment, onClick)
                     .padding(horizontal = 14.dp, vertical = 9.dp),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

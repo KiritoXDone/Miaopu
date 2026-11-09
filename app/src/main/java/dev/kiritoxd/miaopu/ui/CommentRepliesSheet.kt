@@ -67,7 +67,7 @@ internal fun CommentRepliesSheet(viewModel: MiaopuViewModel, target: RatingTarge
                 verticalArrangement = Arrangement.spacedBy(0.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
                 item(key = "parent", contentType = "parent") {
                     Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
-                        .clickable { selectedReply = parent }.padding(14.dp)) {
+                        .copyableComment(parent.content) { selectedReply = parent }.padding(14.dp)) {
                         CommentRow(parent, actions = actions, onLike = { like(parent) }, metadataAbove = true)
                     }
                 }

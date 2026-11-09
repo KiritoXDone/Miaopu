@@ -1,7 +1,6 @@
 package dev.kiritoxd.miaopu.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,11 +23,12 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 internal fun PlayerCommentCard(comment: HupuComment, actions: CommentActionsController, onLike: () -> Unit, onReply: () -> Unit, onReplies: () -> Unit) {
     Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 12.dp),
         insideMargin = PaddingValues(14.dp), cornerRadius = 18.dp, showIndication = true,
-        onClick = onReply) {
+        onClick = onReply, onLongPress = commentCopyAction(comment.content)) {
         CommentRow(comment, actions = actions, onLike = onLike)
         if (comment.previewReplies.isNotEmpty() || actions.replyCount(comment) > 0) {
             Column(Modifier.padding(start = 44.dp, top = 7.dp).fillMaxWidth().clip(RoundedCornerShape(10.dp))
-                .background(MiuixTheme.colorScheme.surface).clickable(onClick = onReplies).padding(10.dp),
+                .background(MiuixTheme.colorScheme.surface)
+                .copyableComment(comment.previewReplies.firstOrNull()?.content.orEmpty(), onReplies).padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 comment.previewReplies.firstOrNull()?.let {
                     Text("${it.author}：${it.content}", fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis,

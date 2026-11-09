@@ -2,7 +2,6 @@ package dev.kiritoxd.miaopu.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -26,7 +25,7 @@ internal fun ReplyThreadCard(
     val depth = row.depth.coerceAtMost(3)
     Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
         .background(if (selected) colors.primary.copy(alpha = 0.08f) else Color.Transparent)
-        .clickable(onClick = onReply)) {
+        .copyableComment(row.comment.content, onReply)) {
         Canvas(Modifier.matchParentSize()) {
             val step = 22.dp.toPx()
             val start = 16.dp.toPx()

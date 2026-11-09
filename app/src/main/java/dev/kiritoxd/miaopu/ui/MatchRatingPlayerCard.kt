@@ -52,6 +52,7 @@ internal fun MatchRatingPlayerCard(target: RatingTarget, onClick: () -> Unit) {
             Text("“$it”", modifier = Modifier.padding(top = 7.dp).fillMaxWidth()
                 .clip(RoundedCornerShape(7.dp))
                 .background(if (dark) Color(0xFF382F20) else Color(0xFFFFF5E3), RoundedCornerShape(7.dp))
+                .copyableComment(it, onClick)
                 .padding(horizontal = 9.dp, vertical = 6.dp), fontSize = 11.sp,
                 color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }

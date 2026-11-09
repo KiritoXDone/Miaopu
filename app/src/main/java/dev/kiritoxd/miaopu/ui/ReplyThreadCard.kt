@@ -4,8 +4,10 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -22,7 +24,8 @@ internal fun ReplyThreadCard(
     val colors = MiuixTheme.colorScheme
     val rail = colors.onSurfaceVariantSummary.copy(alpha = 0.25f)
     val depth = row.depth.coerceAtMost(3)
-    Box(Modifier.fillMaxWidth().background(if (selected) colors.primary.copy(alpha = 0.08f) else Color.Transparent)
+    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+        .background(if (selected) colors.primary.copy(alpha = 0.08f) else Color.Transparent)
         .clickable(onClick = onReply)) {
         Canvas(Modifier.matchParentSize()) {
             val step = 22.dp.toPx()
@@ -36,7 +39,7 @@ internal fun ReplyThreadCard(
             drawLine(rail, Offset(x, center), Offset(x + 12.dp.toPx(), center), 1.dp.toPx(), StrokeCap.Round)
         }
         Box(Modifier.fillMaxWidth().padding(start = (16 + depth * 22).dp, end = 16.dp, top = 14.dp, bottom = 14.dp)) {
-            CommentRow(row.comment, root, actions, onLike, onReply, metadataAbove = true)
+            CommentRow(row.comment, root, actions, onLike, metadataAbove = true)
         }
     }
 }

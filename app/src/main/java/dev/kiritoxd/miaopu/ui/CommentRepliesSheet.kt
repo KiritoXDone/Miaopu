@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import dev.kiritoxd.miaopu.data.CommentThreadRow
 import kotlinx.coroutines.Dispatchers
@@ -65,8 +66,9 @@ internal fun CommentRepliesSheet(viewModel: MiaopuViewModel, target: RatingTarge
             LazyColumn(Modifier.fillMaxWidth().weight(1f, fill = false).heightIn(max = 480.dp),
                 verticalArrangement = Arrangement.spacedBy(0.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
                 item(key = "parent", contentType = "parent") {
-                    Box(Modifier.fillMaxWidth().clickable { selectedReply = parent }.padding(14.dp)) {
-                        CommentRow(parent, actions = actions, onLike = { like(parent) }, onReply = { selectedReply = parent }, metadataAbove = true)
+                    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+                        .clickable { selectedReply = parent }.padding(14.dp)) {
+                        CommentRow(parent, actions = actions, onLike = { like(parent) }, metadataAbove = true)
                     }
                 }
                 when (val state = entry?.state) {

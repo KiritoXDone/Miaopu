@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +50,7 @@ internal fun MatchRatingPlayerCard(target: RatingTarget, onClick: () -> Unit) {
         target.hotComment?.takeIf(String::isNotBlank)?.let {
             val dark = colors.surface.luminance() < 0.5f
             Text("“$it”", modifier = Modifier.padding(top = 7.dp).fillMaxWidth()
+                .clip(RoundedCornerShape(7.dp))
                 .background(if (dark) Color(0xFF382F20) else Color(0xFFFFF5E3), RoundedCornerShape(7.dp))
                 .padding(horizontal = 9.dp, vertical = 6.dp), fontSize = 11.sp,
                 color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)

@@ -22,9 +22,10 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 internal fun PlayerCommentCard(comment: HupuComment, actions: CommentActionsController, onLike: () -> Unit, onReply: () -> Unit, onReplies: () -> Unit) {
-    Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 12.dp).clickable(onClick = onReply),
-        insideMargin = PaddingValues(14.dp), cornerRadius = 18.dp) {
-        CommentRow(comment, actions = actions, onLike = onLike, onReply = onReply)
+    Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 12.dp),
+        insideMargin = PaddingValues(14.dp), cornerRadius = 18.dp, showIndication = true,
+        onClick = onReply) {
+        CommentRow(comment, actions = actions, onLike = onLike)
         if (comment.previewReplies.isNotEmpty() || actions.replyCount(comment) > 0) {
             Column(Modifier.padding(start = 44.dp, top = 7.dp).fillMaxWidth().clip(RoundedCornerShape(10.dp))
                 .background(MiuixTheme.colorScheme.surface).clickable(onClick = onReplies).padding(10.dp),
@@ -43,7 +44,7 @@ internal fun PlayerCommentCard(comment: HupuComment, actions: CommentActionsCont
 }
 
 @Composable
-internal fun CommentRow(comment: HupuComment, root: HupuComment? = null, actions: CommentActionsController, onLike: () -> Unit, onReply: (() -> Unit)? = null, metadataAbove: Boolean = false) {
+internal fun CommentRow(comment: HupuComment, root: HupuComment? = null, actions: CommentActionsController, onLike: () -> Unit, metadataAbove: Boolean = false) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         Box(Modifier.size(34.dp).clip(CircleShape).background(MiuixTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
             if (comment.avatarUrl.isNullOrBlank()) Text(comment.author.take(1), fontSize = 13.sp, color = MiuixTheme.colorScheme.primary)
@@ -76,7 +77,7 @@ internal fun CommentRow(comment: HupuComment, root: HupuComment? = null, actions
             val metadata = listOfNotNull(repliedTo?.let { "回复 $it" }, comment.date.takeIf(String::isNotBlank),
                 comment.location?.takeIf(String::isNotBlank)).joinToString(" · ")
             if (metadataAbove && metadata.isNotBlank()) Text(metadata, fontSize = 11.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-            Text(comment.content, modifier = if (onReply != null) Modifier.clickable(onClick = onReply) else Modifier, fontSize = 14.sp)
+            Text(comment.content, fontSize = 14.sp)
             CommentImages(comment.imageUrls)
             if (!metadataAbove && metadata.isNotBlank()) Text(metadata, fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
         }

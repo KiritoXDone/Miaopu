@@ -26,8 +26,9 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
-import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
+import top.yukonga.miuix.kmp.nav.core.rememberNavController
 import top.yukonga.miuix.kmp.nav.core.rememberNavSystemCornerRadius
+import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
@@ -49,8 +50,8 @@ fun MiaopuApp(viewModel: MiaopuViewModel) {
             }
         }
     }
-    val backStack = rememberNavBackStack<AppScreen>(AppScreen.Schedule)
-    val navigator = remember(backStack) { MiaopuNavigator(backStack) }
+    val navController = rememberNavController<AppScreen>(AppScreen.Schedule)
+    val navigator = remember(navController) { MiaopuNavigator(navController) }
     DisposableEffect(viewModel, navigator) {
         viewModel.attachNavigator(navigator)
         onDispose { viewModel.detachNavigator(navigator) }
@@ -62,17 +63,16 @@ fun MiaopuApp(viewModel: MiaopuViewModel) {
             val backdropColor = MiuixTheme.colorScheme.surface
             val navEffects = remember(cornerRadius, backdropColor) {
                 NavDisplayEffects(
-                    enableCornerClip = false,
+                    enableCornerClip = true,
                     cornerClipRadius = cornerRadius,
                     backdropColor = backdropColor,
                 )
             }
-            val navigationMotion = rememberMiaopuNavigationMotion(cornerRadius)
             NavDisplay(
-                backStack = backStack,
+                navController = navController,
                 modifier = Modifier.fillMaxSize(),
                 onBack = viewModel::goBack,
-                transition = navigationMotion,
+                transition = NavTransitions.MiuixDefault,
                 effects = navEffects,
             ) {
                 entry<AppScreen.Schedule>(contentKey = { it.navigationContentKey }) { ScheduleScreen(viewModel) }

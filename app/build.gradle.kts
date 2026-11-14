@@ -98,12 +98,15 @@ android {
 }
 
 dependencies {
+    // Resolved to the submodule in settings.gradle.kts, not GitHub Packages.
+    val miuixVersion = "0.9.4-2855a36b-SNAPSHOT"
     implementation("androidx.activity:activity-compose:1.13.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
-    implementation("androidx.navigationevent:navigationevent-compose:1.1.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
-    implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.4")
-    implementation("top.yukonga.miuix.kmp:miuix-nav-android:0.9.4")
+    implementation("androidx.navigationevent:navigationevent-compose:1.2.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0")
+    implementation("top.yukonga.miuix.kmp:miuix-ui:$miuixVersion")
+    implementation("top.yukonga.miuix.kmp:miuix-nav:$miuixVersion")
+    implementation("top.yukonga.miuix.kmp:miuix-glass:$miuixVersion")
     implementation("io.coil-kt.coil3:coil-compose:3.5.0")
     implementation("io.coil-kt.coil3:coil-gif:3.5.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.5.0")

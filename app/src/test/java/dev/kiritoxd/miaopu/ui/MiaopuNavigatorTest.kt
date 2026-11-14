@@ -2,11 +2,26 @@ package dev.kiritoxd.miaopu.ui
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import top.yukonga.miuix.kmp.nav.core.NavController
 import top.yukonga.miuix.kmp.nav.core.navBackStackOf
 
 class MiaopuNavigatorTest {
+    @Test
+    fun `navigator and display share the miuix controller stack`() {
+        val controller = NavController(navBackStackOf(AppScreen.Schedule))
+        val navigator = MiaopuNavigator(controller)
+
+        navigator.push(AppScreen.Subscriptions)
+
+        assertSame(controller.backStack, navigator.backStack)
+        assertEquals(AppScreen.Subscriptions, controller.backStack.last())
+        assertTrue(navigator.pop())
+        assertEquals(AppScreen.Schedule, controller.backStack.last())
+    }
+
     @Test
     fun `pop keeps the root screen`() {
         val navigator = MiaopuNavigator()

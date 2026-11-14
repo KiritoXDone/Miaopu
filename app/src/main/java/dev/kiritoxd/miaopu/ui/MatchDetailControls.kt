@@ -30,8 +30,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import top.yukonga.miuix.kmp.basic.TabRowDefaults
-import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -133,16 +131,11 @@ private fun MapTabs(labels: List<String>, selected: Int, onSelect: (Int) -> Unit
 @Composable
 private fun PageTabs(labels: List<String>, selected: Int, onSelect: (Int) -> Unit) {
     val selectedIndex = selected.coerceIn(labels.indices)
-    TabRowWithContour(
-        tabs = labels,
-        selectedTabIndex = selectedIndex,
-        onTabSelected = { index -> if (index != selectedIndex) onSelect(index) },
+    MiaopuSegmentedTabRow(
+        labels = labels,
+        selectedIndex = selectedIndex,
+        onSelect = { index -> if (index != selectedIndex) onSelect(index) },
         modifier = Modifier.padding(horizontal = 16.dp),
-        colors = TabRowDefaults.tabRowColors(
-            backgroundColor = MiuixTheme.colorScheme.surfaceContainerHighest,
-        ),
-        height = 48.dp,
-        cornerRadius = 24.dp,
     )
 }
 

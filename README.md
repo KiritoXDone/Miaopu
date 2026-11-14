@@ -89,10 +89,12 @@ Android 第三方虎扑赛事评分客户端
 项目使用 Kotlin、Jetpack Compose 和 Miuix。构建环境需要 JDK 21、Android SDK 37 与 Build Tools 37.0.0。
 
 ```bash
-git clone https://github.com/KiritoXDone/Miaopu.git
+git clone --recurse-submodules https://github.com/KiritoXDone/Miaopu.git
 cd Miaopu
 ./gradlew testDebugUnitTest assembleDebug
 ```
+
+已有检出可运行 `git submodule update --init --recursive`。Miuix 固定在上游源码子模块的提交，无需 GitHub Packages 凭据。
 
 测试版 APK 位于 `app/build/outputs/apk/debug/app-debug.apk`，应用名称为“喵扑测试版”，可与正式版共存。
 

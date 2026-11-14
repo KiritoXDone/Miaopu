@@ -17,13 +17,14 @@ jobs:
   release:
     name: Build and publish
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Check out tagged source
         uses: actions/checkout@v6
         with:
           persist-credentials: false
+          submodules: recursive
 
       - name: Validate release version
         env:

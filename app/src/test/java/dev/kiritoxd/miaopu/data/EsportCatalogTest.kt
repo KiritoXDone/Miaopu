@@ -6,6 +6,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class EsportCatalogTest {
+    @Test
+    fun scheduleTabsHaveDistinctLabels() {
+        val labels = EsportCatalog.all.map(Esport::shortTitle)
+        assertEquals(labels.size, labels.distinct().size)
+    }
+
     @Test fun savedOrderRetainsOnlySubscribedProjectsAndAppendsNewOnes() {
         assertEquals(listOf(Esport.VALORANT, Esport.LOL, Esport.KOG),
             EsportCatalog.orderedSubscriptions(setOf("lol", "kog", "val"), listOf("val", "unknown", "val", "cs2", "lol")))

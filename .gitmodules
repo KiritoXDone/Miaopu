@@ -1,0 +1,3 @@
+[submodule "vendor/miuix"]
+	path = vendor/miuix
+	url = https://github.com/compose-miuix-ui/miuix.git

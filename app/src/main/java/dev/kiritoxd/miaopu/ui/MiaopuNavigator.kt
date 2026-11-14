@@ -1,22 +1,27 @@
 package dev.kiritoxd.miaopu.ui
 
 import top.yukonga.miuix.kmp.nav.core.NavBackStack
+import top.yukonga.miuix.kmp.nav.core.NavController
 import top.yukonga.miuix.kmp.nav.core.navBackStackOf
 
 internal class MiaopuNavigator(
-    val backStack: NavBackStack = navBackStackOf(AppScreen.Schedule),
+    private val controller: NavController = NavController(navBackStackOf(AppScreen.Schedule)),
 ) {
+    constructor(backStack: NavBackStack) : this(NavController(backStack))
+
+    val backStack: NavBackStack get() = controller.backStack
+
     val currentScreen: AppScreen
         get() = backStack.last() as AppScreen
 
     fun push(screen: AppScreen) {
         if (backStack.none { (it as AppScreen).navigationContentKey == screen.navigationContentKey }) {
-            backStack.add(screen)
+            controller.push(screen)
         }
     }
 
     fun replace(screen: AppScreen) {
-        if (currentScreen != screen) backStack[backStack.lastIndex] = screen
+        if (currentScreen != screen) controller.replace(screen)
     }
 
     fun contains(screen: AppScreen): Boolean =
@@ -30,11 +35,7 @@ internal class MiaopuNavigator(
         }
     }
 
-    fun pop(): Boolean {
-        if (backStack.size <= 1) return false
-        backStack.removeLastOrNull()
-        return true
-    }
+    fun pop(): Boolean = controller.pop()
 }
 
 internal val AppScreen.navigationContentKey: String

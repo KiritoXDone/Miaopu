@@ -69,7 +69,7 @@ internal fun PlayerIdentityCard(
                     (1..5).forEach { stars ->
                         IconButton(onClick = { if (canSelectScore) onScoreChange(stars * 2) else onLogin() }, minWidth = 32.dp, minHeight = 36.dp,
                             modifier = Modifier.semantics { contentDescription = "$stars 星"; selected = selectedScore == stars * 2 }) {
-                            Icon(if (selectedScore >= stars * 2) LucideIcons.StarFilled else LucideIcons.Star, null, Modifier.size(25.dp), tint = colors.primary)
+                            Icon(if (selectedScore >= stars * 2) MiaopuIcons.StarFilled else MiaopuIcons.Star, null, Modifier.size(25.dp), tint = colors.primary)
                         }
                     }
                 }

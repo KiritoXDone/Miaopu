@@ -27,7 +27,6 @@ import dev.kiritoxd.miaopu.data.HupuUrls
 import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TextButton
@@ -70,8 +69,8 @@ fun HupuWebScreen(
                 title = title,
                 subtitle = if (login) "仅在虎扑官方页面输入账号信息" else "虎扑官方互动页面",
                 navigationIcon = {
-                    IconButton(onClick = ::navigateBack) {
-                        Icon(LucideIcons.ChevronLeft, contentDescription = "返回")
+                    TopBarIconButton(onClick = ::navigateBack) {
+                        Icon(MiaopuIcons.ChevronLeft, contentDescription = "返回")
                     }
                 },
                 actions = {

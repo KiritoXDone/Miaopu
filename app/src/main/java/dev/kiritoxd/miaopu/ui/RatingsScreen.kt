@@ -81,8 +81,8 @@ fun RatingsScreen(viewModel: MiaopuViewModel, match: MatchSummary) {
             SmallTopAppBar(
                 title = "比赛详情",
                 navigationIcon = {
-                    IconButton(onClick = viewModel::goBack) {
-                        Icon(LucideIcons.ChevronLeft, contentDescription = "返回赛事")
+                    TopBarIconButton(onClick = viewModel::goBack) {
+                        Icon(MiaopuIcons.ChevronLeft, contentDescription = "返回赛事")
                     }
                 },
             )

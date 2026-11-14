@@ -38,7 +38,7 @@ internal fun PlayerCommentCard(comment: HupuComment, actions: CommentActionsCont
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("查看全部 ${maxOf(actions.replyCount(comment), comment.previewReplies.size)} 条回复", fontSize = 12.sp, color = MiuixTheme.colorScheme.primary)
-                    Icon(LucideIcons.ChevronRight, null, Modifier.size(14.dp), tint = MiuixTheme.colorScheme.primary)
+                    Icon(MiaopuIcons.ChevronRight, null, Modifier.size(14.dp), tint = MiuixTheme.colorScheme.primary)
                 }
             }
         }

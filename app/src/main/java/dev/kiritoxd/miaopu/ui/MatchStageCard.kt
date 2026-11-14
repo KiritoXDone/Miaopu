@@ -76,7 +76,7 @@ fun MatchStageCard(
                 color = MiuixTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
             )
-            Icon(LucideIcons.ChevronRight, null, Modifier.size(16.dp), tint = MiuixTheme.colorScheme.primary)
+            Icon(MiaopuIcons.ChevronRight, null, Modifier.size(16.dp), tint = MiuixTheme.colorScheme.primary)
         }
         if (playerPreviews.isNotEmpty()) {
             Spacer(Modifier.height(14.dp))

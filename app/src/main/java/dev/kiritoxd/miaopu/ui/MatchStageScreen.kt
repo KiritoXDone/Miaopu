@@ -79,8 +79,8 @@ fun MatchStageScreen(
                 title = "单局详情",
                 subtitle = if (showStageNumber) "第 $stageNumber 局 · ${stage.name}" else stage.name,
                 navigationIcon = {
-                    IconButton(onClick = viewModel::goBack) {
-                        Icon(LucideIcons.ChevronLeft, contentDescription = "返回赛事详情")
+                    TopBarIconButton(onClick = viewModel::goBack) {
+                        Icon(MiaopuIcons.ChevronLeft, contentDescription = "返回赛事详情")
                     }
                 },
             )
@@ -395,8 +395,8 @@ private fun FractionalRatingStars(scoreAverage: Double, scoreCount: Int) {
     }, horizontalArrangement = Arrangement.SpaceBetween) {
         ratingStarFillFractions(scoreAverage, scoreCount).forEach { fraction ->
             Box(Modifier.size(12.dp)) {
-                Icon(LucideIcons.Star, null, Modifier.fillMaxSize(), tint = outlineColor)
-                if (fraction > 0f) Icon(LucideIcons.StarFilled, null,
+                Icon(MiaopuIcons.Star, null, Modifier.fillMaxSize(), tint = outlineColor)
+                if (fraction > 0f) Icon(MiaopuIcons.StarFilled, null,
                     Modifier.fillMaxSize().drawWithContent {
                         clipRect(right = size.width * fraction) { this@drawWithContent.drawContent() }
                     }, tint = HupuScoreBlue)

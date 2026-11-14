@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -60,11 +61,10 @@ import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 private class MainPageRequest(val section: MainSection)
 
@@ -485,11 +485,11 @@ private fun HomeHeader(viewModel: MiaopuViewModel) {
     PageHeading(
         title = "近期赛程",
         actions = {
-            IconButton(
+            TopBarIconButton(
                 onClick = viewModel::refreshHomeSchedules,
-                backgroundColor = MiuixTheme.colorScheme.surfaceContainer,
+                fill = MiuixTheme.colorScheme.surfaceContainer,
             ) {
-                Icon(LucideIcons.RefreshCw, contentDescription = "刷新赛程")
+                Icon(MiaopuIcons.RefreshCw, contentDescription = "刷新赛程")
             }
         },
     )
@@ -509,21 +509,21 @@ private fun EventsHeader(
         title = "完整赛程",
         actions = {
             Row {
-                IconButton(
+                TopBarIconButton(
                     onClick = { onSearchExpandedChange(!searchExpanded) },
-                    backgroundColor = MiuixTheme.colorScheme.surfaceContainer,
+                    fill = MiuixTheme.colorScheme.surfaceContainer,
                 ) {
                     Icon(
-                        LucideIcons.Search,
+                        MiaopuIcons.Search,
                         contentDescription = if (searchExpanded) "关闭搜索" else "搜索赛程",
                     )
                 }
                 Spacer(Modifier.width(8.dp))
-                IconButton(
+                TopBarIconButton(
                     onClick = viewModel::refreshSchedule,
-                    backgroundColor = MiuixTheme.colorScheme.surfaceContainer,
+                    fill = MiuixTheme.colorScheme.surfaceContainer,
                 ) {
-                    Icon(LucideIcons.RefreshCw, contentDescription = "刷新赛程")
+                    Icon(MiaopuIcons.RefreshCw, contentDescription = "刷新赛程")
                 }
             }
         },
@@ -594,7 +594,7 @@ private fun ProfileContent(viewModel: MiaopuViewModel, innerPadding: PaddingValu
                             color = MiuixTheme.colorScheme.onPrimary.copy(alpha = 0.72f),
                         )
                     }
-                    Icon(LucideIcons.CircleUserRound, null, Modifier.size(32.dp))
+                    Icon(MiaopuIcons.CircleUserRound, null, Modifier.size(32.dp))
                 }
                 Spacer(Modifier.height(18.dp))
                 Button(
@@ -612,37 +612,24 @@ private fun ProfileContent(viewModel: MiaopuViewModel, innerPadding: PaddingValu
         item { SectionHeading("赛事订阅") }
         item {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .semantics {
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                insideMargin = PaddingValues(0.dp),
+                cornerRadius = 20.dp,
+            ) {
+                ArrowPreference(
+                    title = "管理赛事项目",
+                    summary = "已订阅 ${viewModel.subscribedEsports.size} 个赛事项目",
+                    modifier = Modifier.semantics {
                         role = Role.Button
                         contentDescription = "管理赛事订阅，当前 ${viewModel.subscribedEsports.size} 个项目"
                     },
-                insideMargin = PaddingValues(18.dp),
-                cornerRadius = 20.dp,
-                onClick = viewModel::openSubscriptions,
-                pressFeedbackType = PressFeedbackType.Sink,
-                showIndication = true,
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text("管理赛事项目", fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(3.dp))
-                        Text(
-                            "已订阅 ${viewModel.subscribedEsports.size} 个赛事项目",
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                        )
-                    }
-                    Text(
-                        "管理",
-                        style = MiuixTheme.textStyles.footnote1,
-                        color = MiuixTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Icon(LucideIcons.ChevronRight, null, Modifier.size(16.dp), tint = MiuixTheme.colorScheme.primary)
-                }
+                    insideMargin = PaddingValues(18.dp),
+                    onClick = viewModel::openSubscriptions,
+                    endActions = {
+                        Text("管理", style = MiuixTheme.textStyles.footnote1,
+                            color = MiuixTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    },
+                )
             }
         }
         item { SectionHeading("应用") }
@@ -701,42 +688,30 @@ private fun ProfileActionCard(
     onClick: () -> Unit,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 5.dp)
-            .semantics {
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 5.dp),
+        insideMargin = PaddingValues(0.dp),
+        cornerRadius = 20.dp,
+    ) {
+        ArrowPreference(
+            title = title,
+            summary = summary,
+            modifier = Modifier.semantics {
                 role = Role.Button
                 contentDescription = "$title，$summary"
+                if (!enabled) disabled()
             },
-        insideMargin = PaddingValues(18.dp),
-        cornerRadius = 20.dp,
-        onClick = onClick.takeIf { enabled },
-        pressFeedbackType = if (enabled) PressFeedbackType.Sink else PressFeedbackType.None,
-        showIndication = enabled,
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(title, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(3.dp))
+            insideMargin = PaddingValues(18.dp),
+            enabled = enabled,
+            onClick = onClick,
+            endActions = {
                 Text(
-                    summary,
+                    action,
                     style = MiuixTheme.textStyles.footnote1,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                    color = if (enabled) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                    fontWeight = FontWeight.Bold,
                 )
-            }
-            Spacer(Modifier.width(12.dp))
-            Text(
-                action,
-                style = MiuixTheme.textStyles.footnote1,
-                color = if (enabled) {
-                    MiuixTheme.colorScheme.primary
-                } else {
-                    MiuixTheme.colorScheme.onSurfaceVariantSummary
-                },
-                fontWeight = FontWeight.Bold,
-            )
-            Icon(LucideIcons.ChevronRight, null, Modifier.size(16.dp), tint = if (enabled) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary)
-        }
+            },
+        )
     }
 }
 

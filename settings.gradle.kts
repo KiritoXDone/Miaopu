@@ -24,5 +24,7 @@ includeBuild("vendor/miuix") {
         substitute(module("top.yukonga.miuix.kmp:miuix-ui")).using(project(":miuix-ui"))
         substitute(module("top.yukonga.miuix.kmp:miuix-nav")).using(project(":miuix-nav"))
         substitute(module("top.yukonga.miuix.kmp:miuix-glass")).using(project(":miuix-glass"))
+        substitute(module("top.yukonga.miuix.kmp:miuix-glass-icons")).using(project(":miuix-glass-icons"))
+        substitute(module("top.yukonga.miuix.kmp:miuix-preference")).using(project(":miuix-preference"))
     }
 }

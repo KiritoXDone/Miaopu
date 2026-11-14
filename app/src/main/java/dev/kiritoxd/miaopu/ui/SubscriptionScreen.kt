@@ -37,7 +37,7 @@ fun SubscriptionScreen(viewModel: MiaopuViewModel) {
     }
     Scaffold(containerColor = MiuixTheme.colorScheme.surface, topBar = {
         SmallTopAppBar(title = "赛事订阅", navigationIcon = {
-            IconButton(onClick = viewModel::goBack) { Icon(LucideIcons.ChevronLeft, "返回我的") }
+            TopBarIconButton(onClick = viewModel::goBack) { Icon(MiaopuIcons.ChevronLeft, "返回我的") }
         })
     }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 20.dp),

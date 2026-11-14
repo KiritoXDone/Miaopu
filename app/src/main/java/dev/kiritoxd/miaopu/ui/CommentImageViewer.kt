@@ -188,7 +188,7 @@ internal fun CommentImageViewer(
                     minHeight = 48.dp,
                 ) {
                     Icon(
-                        imageVector = LucideIcons.X,
+                        imageVector = MiaopuIcons.X,
                         contentDescription = "关闭图片预览",
                         tint = Color.White,
                     )

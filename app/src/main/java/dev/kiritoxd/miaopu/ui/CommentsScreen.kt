@@ -48,7 +48,7 @@ fun CommentsScreen(viewModel: MiaopuViewModel, target: RatingTarget) {
     }
     Scaffold(containerColor = MiuixTheme.colorScheme.surface, modifier = Modifier.imePadding(), topBar = {
         SmallTopAppBar(title = "选手评分", navigationIcon = {
-            IconButton(onClick = viewModel::goBack) { Icon(LucideIcons.ChevronLeft, "返回评分") }
+            TopBarIconButton(onClick = viewModel::goBack) { Icon(MiaopuIcons.ChevronLeft, "返回评分") }
         })
     }) { padding ->
         val state = viewModel.commentState

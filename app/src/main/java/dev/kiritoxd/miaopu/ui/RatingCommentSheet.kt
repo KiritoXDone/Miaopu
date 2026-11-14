@@ -18,7 +18,7 @@ internal fun RatingCommentSheet(
 ) {
     OverlayBottomSheet(show = show, title = "发表评论 · ${selectedScore}分",
         onDismissRequest = onDismiss, endAction = {
-            IconButton(onClick = onDismiss) { Icon(LucideIcons.X, "关闭评论输入", Modifier.size(20.dp)) }
+            IconButton(onClick = onDismiss) { Icon(MiaopuIcons.X, "关闭评论输入", Modifier.size(20.dp)) }
         }, backgroundColor = MiuixTheme.colorScheme.surfaceContainer,
         insideMargin = DpSize(0.dp, 12.dp), outsideMargin = DpSize(0.dp, 0.dp)) {
         if (show) Column(Modifier.fillMaxWidth().imePadding()) {

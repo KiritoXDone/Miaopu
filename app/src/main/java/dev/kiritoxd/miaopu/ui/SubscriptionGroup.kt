@@ -60,7 +60,7 @@ internal fun SubscriptionGroup(
                         contentDescription = "${if (active) "取消订阅" else "订阅"}${sport.title}"
                     }) {
                         Box(Modifier.size(24.dp).background(if (active) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.primary.copy(alpha = 0.08f), CircleShape), contentAlignment = Alignment.Center) {
-                            Icon(if (active) LucideIcons.Check else LucideIcons.Plus, null, Modifier.size(18.dp),
+                            Icon(if (active) MiaopuIcons.Check else MiaopuIcons.Plus, null, Modifier.size(18.dp),
                                 tint = if (active) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.primary)
                         }
                     }

@@ -10,9 +10,9 @@ import top.yukonga.miuix.kmp.basic.NavigationBarItem
 private class NavigationDestination(val section: MainSection, val icon: ImageVector, val label: String)
 
 private val destinations = listOf(
-    NavigationDestination(MainSection.HOME, LucideIcons.House, "首页"),
-    NavigationDestination(MainSection.EVENTS, LucideIcons.CalendarDays, "赛事"),
-    NavigationDestination(MainSection.PROFILE, LucideIcons.CircleUserRound, "我的"),
+    NavigationDestination(MainSection.HOME, MiaopuIcons.House, "首页"),
+    NavigationDestination(MainSection.EVENTS, MiaopuIcons.CalendarDays, "赛事"),
+    NavigationDestination(MainSection.PROFILE, MiaopuIcons.CircleUserRound, "我的"),
 )
 
 @Composable

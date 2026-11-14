@@ -59,7 +59,7 @@ internal fun CommentRepliesSheet(viewModel: MiaopuViewModel, target: RatingTarge
     val like: (HupuComment) -> Unit = { if (viewModel.isLoggedIn) actions.toggleLike(it) else viewModel.openLogin() }
     OverlayBottomSheet(show = parent != null, title = "${maxOf(parent?.let(actions::replyCount) ?: 0, page?.totalCount ?: 0)} 条回复",
         onDismissRequest = onDismiss, startAction = {
-            IconButton(onClick = onDismiss) { Icon(LucideIcons.X, "关闭回复", Modifier.size(20.dp)) }
+            IconButton(onClick = onDismiss) { Icon(MiaopuIcons.X, "关闭回复", Modifier.size(20.dp)) }
         }, backgroundColor = MiuixTheme.colorScheme.surfaceContainer, cornerRadius = 24.dp,
         insideMargin = DpSize(16.dp, 12.dp), outsideMargin = DpSize(0.dp, 0.dp)) {
         if (parent != null) Column(Modifier.fillMaxWidth().imePadding()) {
@@ -88,7 +88,7 @@ internal fun CommentRepliesSheet(viewModel: MiaopuViewModel, target: RatingTarge
                                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text(if (entry.isLoadingMore || preparing) "正在加载…" else if (entry.paginationError != null) "重新加载回复" else "展开更多回复",
                                     fontSize = 14.sp, color = MiuixTheme.colorScheme.primary)
-                                Icon(LucideIcons.ChevronRight, null, Modifier.size(16.dp).rotate(90f), tint = MiuixTheme.colorScheme.primary)
+                                Icon(MiaopuIcons.ChevronRight, null, Modifier.size(16.dp).rotate(90f), tint = MiuixTheme.colorScheme.primary)
                             }
                         }
                     }
@@ -102,7 +102,7 @@ internal fun CommentRepliesSheet(viewModel: MiaopuViewModel, target: RatingTarge
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text("回复 ${replyTo.author}", Modifier.weight(1f), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                             IconButton(onClick = { selectedReply = null }, minWidth = 32.dp, minHeight = 32.dp) {
-                                Icon(LucideIcons.X, "取消指定回复", Modifier.size(18.dp))
+                                Icon(MiaopuIcons.X, "取消指定回复", Modifier.size(18.dp))
                             }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {

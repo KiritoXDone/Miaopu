@@ -1,6 +1,7 @@
 package dev.kiritoxd.miaopu.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -28,7 +30,7 @@ internal fun PlayerCommentCard(comment: HupuComment, actions: CommentActionsCont
         if (comment.previewReplies.isNotEmpty() || actions.replyCount(comment) > 0) {
             Column(Modifier.padding(start = 44.dp, top = 7.dp).fillMaxWidth().clip(RoundedCornerShape(10.dp))
                 .background(MiuixTheme.colorScheme.surface)
-                .copyableComment(comment.previewReplies.firstOrNull()?.content.orEmpty(), onReplies).padding(10.dp),
+                .clickable(role = Role.Button, onClick = onReplies).padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 comment.previewReplies.firstOrNull()?.let {
                     Text("${it.author}：${it.content}", fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis,

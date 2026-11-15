@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import dev.kiritoxd.miaopu.data.BottomBarStyle
 import dev.kiritoxd.miaopu.data.Esport
 import dev.kiritoxd.miaopu.data.EsportCatalog
 import dev.kiritoxd.miaopu.data.Schedule
@@ -63,6 +64,9 @@ import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -121,27 +125,38 @@ fun ScheduleScreen(viewModel: MiaopuViewModel) {
                 if (section != viewModel.selectedMainSection) viewModel.selectMainSection(section)
             }
     }
+    val surfaceColor = MiuixTheme.colorScheme.surface
+    val style = viewModel.bottomBarStyle
+    val needsBackdrop = (style == BottomBarStyle.LIQUID_GLASS || style == BottomBarStyle.OS4_GLASS) &&
+        isRuntimeShaderSupported()
+    val backdrop = if (needsBackdrop) rememberLayerBackdrop {
+        drawRect(surfaceColor)
+        drawContent()
+    } else null
     Scaffold(
-        containerColor = MiuixTheme.colorScheme.surface,
+        containerColor = surfaceColor,
         bottomBar = {
             MainNavigationBar(
                 selected = visibleSection,
-                floating = viewModel.floatingNavigationBarEnabled,
+                style = style,
+                backdrop = backdrop,
                 onSelect = selectSection,
             )
         },
     ) { innerPadding ->
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize(),
-            key = { page -> sections[page].name },
-        ) { page ->
-            MainSectionContent(
-                viewModel = viewModel,
-                section = sections[page],
-                subscriptions = subscriptions,
-                innerPadding = innerPadding,
-            )
+        Box(Modifier.fillMaxSize().then(if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier)) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                key = { page -> sections[page].name },
+            ) { page ->
+                MainSectionContent(
+                    viewModel = viewModel,
+                    section = sections[page],
+                    subscriptions = subscriptions,
+                    innerPadding = innerPadding,
+                )
+            }
         }
     }
 }
@@ -635,8 +650,8 @@ private fun ProfileContent(viewModel: MiaopuViewModel, innerPadding: PaddingValu
         item { SectionHeading("应用") }
         item {
             AppearanceSettingsCard(
-                floatingNavigationBarEnabled = viewModel.floatingNavigationBarEnabled,
-                onFloatingNavigationBarChange = viewModel::updateFloatingNavigationBar,
+                style = viewModel.bottomBarStyle,
+                onStyleChange = viewModel::updateBottomBarStyle,
             )
         }
         item {

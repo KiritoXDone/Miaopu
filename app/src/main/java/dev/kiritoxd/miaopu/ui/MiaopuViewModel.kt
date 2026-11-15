@@ -11,6 +11,7 @@ import dev.kiritoxd.miaopu.BuildConfig
 import dev.kiritoxd.miaopu.data.AdapterResult
 import dev.kiritoxd.miaopu.data.AdapterStatus
 import dev.kiritoxd.miaopu.data.AppSettingsStore
+import dev.kiritoxd.miaopu.data.BottomBarStyle
 import dev.kiritoxd.miaopu.data.CommentPage
 import dev.kiritoxd.miaopu.data.Esport
 import dev.kiritoxd.miaopu.data.EsportCatalog
@@ -87,7 +88,7 @@ class MiaopuViewModel(
     private val scheduleRefreshFeedback = ScheduleRefreshFeedback { refreshMessageEvents.tryEmit(it) }
 
     internal val screen: AppScreen get() = navigator?.currentScreen ?: AppScreen.Schedule
-    var floatingNavigationBarEnabled: Boolean by mutableStateOf(appSettingsStore.floatingNavigationBarEnabled())
+    internal var bottomBarStyle: BottomBarStyle by mutableStateOf(appSettingsStore.bottomBarStyle())
         private set
     var subscribedEsports: List<Esport> by mutableStateOf(initialSubscriptions)
         private set
@@ -217,9 +218,9 @@ class MiaopuViewModel(
         savedStateHandle[SELECTED_MAIN_SECTION_KEY] = section.name
     }
 
-    fun updateFloatingNavigationBar(enabled: Boolean) {
-        floatingNavigationBarEnabled = enabled
-        appSettingsStore.saveFloatingNavigationBarEnabled(enabled)
+    internal fun updateBottomBarStyle(style: BottomBarStyle) {
+        bottomBarStyle = style
+        appSettingsStore.saveBottomBarStyle(style)
     }
 
     fun retry() {

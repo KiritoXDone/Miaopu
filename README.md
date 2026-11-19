@@ -86,7 +86,7 @@ Android 第三方虎扑赛事评分客户端
 
 ## 本地构建
 
-项目使用 Kotlin、Jetpack Compose 和 Miuix。构建环境需要 JDK 21、Android SDK 37 与 Build Tools 37.0.0。
+项目使用 Kotlin、Jetpack Compose 和 Miuix。构建环境需要 JDK 21、Android SDK 37.2 与 Build Tools 37.0.0。
 
 ```bash
 git clone --recurse-submodules https://github.com/KiritoXDone/Miaopu.git

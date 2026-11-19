@@ -24,7 +24,7 @@ android {
     buildToolsVersion = "37.0.0"
     compileSdk {
         version = release(37) {
-            minorApiLevel = 0
+            minorApiLevel = 2
         }
     }
 
@@ -99,7 +99,7 @@ android {
 
 dependencies {
     // Resolved to the submodule in settings.gradle.kts, not GitHub Packages.
-    val miuixVersion = "0.9.4-2855a36b-SNAPSHOT"
+    val miuixVersion = "0.9.5-beta01"
     implementation("androidx.activity:activity-compose:1.13.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
     implementation("androidx.navigationevent:navigationevent-compose:1.2.0")
